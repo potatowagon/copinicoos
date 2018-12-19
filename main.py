@@ -15,16 +15,21 @@ def runWorker(worker_username, worker_password, lonlat, start_date, end_date, di
         print(cmd)
         subprocess.call(cmd, stdout=log, stderr=log, shell=True)
         
+        new_file = untracked_file_name(dir_path)
+        
         cmd = "git status -s | grep '?? " + dir_path + "' | awk '{ print $2 }' | xargs git add" 
         subprocess.call(cmd, stdout=log, stderr=log, shell=True)
-        
+
         cmd = "git commit 'add file'" 
         subprocess.call(cmd, stdout=log, stderr=log, shell=True)
         
-        thread_upload = Thread(target)
+        thread_upload = Thread(target=runUpload, args=(new_file))
 
-def runUpload(dir_path, log):
+def runUpload(new_file, log):
     cmd = "git push data master" 
+    subprocess.call(cmd, stdout=log, stderr=log, shell=True)
+
+    cmd = "rm " + new_file
     subprocess.call(cmd, stdout=log, stderr=log, shell=True)
 
 def get_total_results(dir_path):
@@ -33,6 +38,10 @@ def get_total_results(dir_path):
     p = re.compile("of (.*) total")
     max = p.search(out)
     return max.group(1)
+
+def untracked_file_name(dir_path):
+    cmd = "git status -s | grep '?? " + dir_path + "' | awk '{ print $2 }'
+    return subprocess.check_output(cmd, shell=True)
 
 def main():
     lonlat = "-6.117176708154047,35.429154357361384:-5.998938062810441,35.579892441113685" #morocco, allysah
@@ -80,6 +89,7 @@ def main():
     thread_2017 = Thread(target=runWorker, args=(secrets.worker4_username, secrets.worker4_password, lonlat, start_2017, end_2017, dir_path_2017, max2017, worker_log_2017)) 
     
     #thread_2014.start()
+    thread_2017.start()
 
 if __name__ == "__main__":
     main()
