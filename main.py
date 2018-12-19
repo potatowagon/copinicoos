@@ -10,7 +10,7 @@ def runQuery(worker_username, worker_password, lonlat, start_date, end_date, log
     subprocess.call(cmd, stdout=log, stderr=log, shell=True)
 
 def runWorker(worker_username, worker_password, lonlat, start_date, end_date, dir_path, max_results, log):
-    for page in range(0, max_results):
+    for page in range(1, max_results):
         cmd = './dhusget.sh -u ' + str(worker_username) + ' -p ' + str(worker_password) + ' -T GRD -m "Sentinel-1" -c "' + str(lonlat) + '" -S ' + start_date + ' -E ' + end_date + ' -l 1 -P ' + str(page) + ' -o product -O ' + dir_path + ' -w 5 -W 10'
         subprocess.call(cmd, stdout=log, stderr=log, shell=True)
 
