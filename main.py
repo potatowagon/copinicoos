@@ -9,7 +9,7 @@ def runQuery(worker_username, worker_password, lonlat, start_date, end_date, log
     cmd = './dhusget.sh -u ' + str(worker_username) + ' -p ' + str(worker_password) + ' -T GRD -m "Sentinel-1" -c "' + str(lonlat) + '" -S ' + start_date + ' -E ' + end_date + ' -l 1 -P 1'
     subprocess.call(cmd, stdout=log, stderr=log, shell=True)
 
-def runWorker(worker_username, worker_password, lonlat, start_date, end_date, dir_path, max_results, log):
+def runWorker(worker_username, worker_password, lonlat, start_date, end_date, dir_path, max_results, worker_log, upload_log):
     for page in range(1, int(max_results) + 1):
         cmd = './dhusget.sh -u ' + str(worker_username) + ' -p ' + str(worker_password) + ' -T GRD -m "Sentinel-1" -c "' + str(lonlat) + '" -S ' + start_date + ' -E ' + end_date + ' -l 1 -P ' + str(page) + ' -o product -O ' + dir_path + ' -w 5 -W 30'
         print(cmd)
@@ -23,7 +23,7 @@ def runWorker(worker_username, worker_password, lonlat, start_date, end_date, di
         cmd = "git commit 'add file'" 
         subprocess.call(cmd, stdout=log, stderr=log, shell=True)
         
-        thread_upload = Thread(target=runUpload, args=(new_file))
+        thread_upload = Thread(target=runUpload, args=(new_file, upload_log))
         thread_upload.start()
 
 def runUpload(new_file, log):
@@ -97,7 +97,7 @@ def main():
     print("total results in 2017: " + max2017)
     
     #thread_2014 = Thread(target=runWorker, args=(secrets.worker1_username, secrets.worker1_password, lonlat, start_2014, end_2014, dir_path_2014, max2014, worker_log_2014)) 
-    thread_2017 = Thread(target=runWorker, args=(secrets.worker4_username, secrets.worker4_password, lonlat, start_2017, end_2017, dir_path_2017, max2017, worker_log_2017)) 
+    thread_2017 = Thread(target=runWorker, args=(secrets.worker4_username, secrets.worker4_password, lonlat, start_2017, end_2017, dir_path_2017, max2017, worker_log_2017, upload_log_2017)) 
     
     #thread_2014.start()
     thread_2017.start()
