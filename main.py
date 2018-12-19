@@ -9,9 +9,10 @@ def runQuery(worker_username, worker_password, lonlat, start_date, end_date, log
     cmd = './dhusget.sh -u ' + str(worker_username) + ' -p ' + str(worker_password) + ' -T GRD -m "Sentinel-1" -c "' + str(lonlat) + '" -S ' + start_date + ' -E ' + end_date + ' -l 1 -P 1'
     subprocess.call(cmd, stdout=log, stderr=log, shell=True)
 
-def runWorker(worker_username, worker_password, lonlat, start_date, end_date, max, log):
-    cmd = './dhusget.sh -u ' + str(worker_username) + ' -p ' + str(worker_password) + ' -T GRD -m "Sentinel-1" -c "' + str(lonlat) + '" -S ' + start_date + ' -E ' + end_date + ' -l 1 -P ' + page + ' -o product -O ' + dir_path + ' -w 5 -W 10'
-    subprocess.call(cmd, stdout=log, stderr=log, shell=True)
+def runWorker(worker_username, worker_password, lonlat, start_date, end_date, dir_path, max_results, log):
+    for page in range(0, max_results):
+        cmd = './dhusget.sh -u ' + str(worker_username) + ' -p ' + str(worker_password) + ' -T GRD -m "Sentinel-1" -c "' + str(lonlat) + '" -S ' + start_date + ' -E ' + end_date + ' -l 1 -P ' + page + ' -o product -O ' + dir_path + ' -w 5 -W 10'
+        subprocess.call(cmd, stdout=log, stderr=log, shell=True)
 
 def runUpload(dir_path, log):
     cmd = "git status -s | grep '?? " + dir_path + "' | awk '{ print $2 }' | xargs git add" 
@@ -24,7 +25,6 @@ def runUpload(dir_path, log):
 def get_total_results(dir_path):
     cmd = "cat " + dir_path + "/OSquery-result.xml | grep 'subtitle'"
     out = subprocess.check_output(cmd, shell=True)
-    print(out)
     p = re.compile("of (.*) total")
     max = p.search(out)
     return max.group(1)
@@ -51,18 +51,19 @@ def main():
     dir_path_2016 = "morocco/2016"
     dir_path_2017 = "morocco/2017"
    
-    query_log = open('query_log.txt', 'w+')
-    worker_log = open('worker_log.txt', 'w+')
-    upload_log = open('upload_log.txt', 'w+')
+    query_log_2014 = open('query_log.txt', 'w+')
+    worker_log_2014 = open('worker_log.txt', 'w+')
+    upload_log_2014 = open('upload_log.txt', 'w+')
 
     runQuery(secrets.worker1_username, secrets.worker1_password, lonlat, start_2014, end_2014, query_log)
     max2014 = get_total_results(".")
-    print(max2014)
     runQuery(secrets.worker2_username, secrets.worker2_password, lonlat, start_2015, end_2015, query_log)
     max2015 = get_total_results(".")
-    #thread_2014 = Thread(target=runWorker, args=(secrets.worker1_username, secrets.worker1_password, lonlat, )) 
 
-    #server.start()
+    #thread_2014 = Thread(target=runWorker, args=(secrets.worker1_username, secrets.worker1_password, lonlat, dir_path_2014, max2014, query_log_2014)) 
+    thread_2014 = Thread(target=runWorker, args=(secrets.worker1_username, secrets.worker1_password, lonlat, dir_path_2014, 1, query_log_2014)) 
+
+    thread_2014.start()
 
 if __name__ == "__main__":
     main()
