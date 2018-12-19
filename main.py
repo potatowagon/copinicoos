@@ -10,7 +10,7 @@ def runQuery(worker_username, worker_password, lonlat, start_date, end_date, log
     subprocess.call(cmd, stdout=log, stderr=log, shell=True)
 
 def runWorker(worker_username, worker_password, lonlat, start_date, end_date, dir_path, max_results, log):
-    for page in range(1, max_results):
+    for page in range(1, max_results + 1):
         cmd = './dhusget.sh -u ' + str(worker_username) + ' -p ' + str(worker_password) + ' -T GRD -m "Sentinel-1" -c "' + str(lonlat) + '" -S ' + start_date + ' -E ' + end_date + ' -l 1 -P ' + str(page) + ' -o product -O ' + dir_path + ' -w 5 -W 10'
         print(cmd)
         subprocess.call(cmd, stdout=log, stderr=log, shell=True)
@@ -58,11 +58,12 @@ def main():
 
     runQuery(secrets.worker1_username, secrets.worker1_password, lonlat, start_2014, end_2014, query_log)
     max2014 = get_total_results(".")
+    print(max2014)
     runQuery(secrets.worker2_username, secrets.worker2_password, lonlat, start_2015, end_2015, query_log)
     max2015 = get_total_results(".")
 
-    thread_2014 = Thread(target=runWorker, args=(secrets.worker1_username, secrets.worker1_password, lonlat, start_2014, end_2014, dir_path_2014, 1, worker_log_2014)) 
-
+    thread_2014 = Thread(target=runWorker, args=(secrets.worker1_username, secrets.worker1_password, lonlat, start_2014, end_2014, dir_path_2014, 2, worker_log_2014)) 
+    print("here")
     thread_2014.start()
 
 if __name__ == "__main__":
