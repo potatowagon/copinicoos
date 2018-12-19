@@ -40,7 +40,7 @@ def get_total_results(dir_path):
     return max.group(1)
 
 def untracked_file_name(dir_path):
-    cmd = "git status -s | grep '?? " + dir_path + "' | awk '{ print $2 }'
+    cmd = "git status -s | grep '?? " + dir_path + "' | awk '{ print $2 }'"
     return subprocess.check_output(cmd, shell=True)
 
 def main():
