@@ -21,7 +21,7 @@ def runWorker(worker_username, worker_password, lonlat, start_date, end_date, di
         subprocess.call(cmd, stdout=log, stderr=log, shell=True)
 
         cmd = "git commit 'add file'" 
-        subprocess.call(cmd, stdout=log, stderr=log, shell=True)
+        subprocess.call(cmd, stdout=worker_log, stderr=worker_log, shell=True)
         
         thread_upload = Thread(target=runUpload, args=(new_file, upload_log))
         thread_upload.start()
