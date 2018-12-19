@@ -24,6 +24,7 @@ def runUpload(dir_path, log):
 def get_total_results(dir_path):
     cmd = "cat " + dir_path + "/OSquery-result.xml | grep 'subtitle'"
     out = subprocess.check_output(cmd, shell=True)
+    print(out)
     p = re.compile("of (.*) total")
     max = p.search(out)
     return max.group(1)
