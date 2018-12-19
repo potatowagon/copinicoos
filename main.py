@@ -61,7 +61,7 @@ def main():
     max2015 = get_total_results(".")
 
     #thread_2014 = Thread(target=runWorker, args=(secrets.worker1_username, secrets.worker1_password, lonlat, dir_path_2014, max2014, query_log_2014)) 
-    thread_2014 = Thread(target=runWorker, args=(secrets.worker1_username, secrets.worker1_password, lonlat, dir_path_2014, 1, query_log_2014)) 
+    thread_2014 = Thread(target=runWorker, args=(secrets.worker1_username, secrets.worker1_password, lonlat, dir_path_2014, 1, worker_log_2014)) 
 
     thread_2014.start()
 
