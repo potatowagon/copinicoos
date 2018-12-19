@@ -24,6 +24,7 @@ def runWorker(worker_username, worker_password, lonlat, start_date, end_date, di
         subprocess.call(cmd, stdout=log, stderr=log, shell=True)
         
         thread_upload = Thread(target=runUpload, args=(new_file))
+        thread_upload.start()
 
 def runUpload(new_file, log):
     cmd = "git push data master" 
