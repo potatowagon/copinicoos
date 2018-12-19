@@ -25,8 +25,8 @@ def get_total_results(dir_path):
     cmd = "cat " + dir_path + "/OSquery-result.xml | grep 'subtitle'"
     out = subprocess.check_output(cmd, shell=True)
     p = re.compile("of (.*) total")
-    p.search(out)
-    return _.group(1)
+    max = p.search(out)
+    return max.group(1)
 
 def main():
     lonlat = "-6.117176708154047,35.429154357361384:-5.998938062810441,35.579892441113685" #morocco, allysah
@@ -56,6 +56,7 @@ def main():
 
     runQuery(secrets.worker1_username, secrets.worker1_password, lonlat, start_2014, end_2014, query_log)
     max2014 = get_total_results(".")
+    print(max2014)
     runQuery(secrets.worker2_username, secrets.worker2_password, lonlat, start_2015, end_2015, query_log)
     max2015 = get_total_results(".")
     #thread_2014 = Thread(target=runWorker, args=(secrets.worker1_username, secrets.worker1_password, lonlat, )) 
