@@ -51,9 +51,9 @@ def main():
     dir_path_2016 = "morocco/2016"
     dir_path_2017 = "morocco/2017"
    
-    query_log = open('query_log.txt', 'r')
-    worker_log = open('worker_log.txt', 'r')
-    upload_log = open('upload_log.txt', 'r')
+    query_log = open('query_log.txt', 'w+')
+    worker_log = open('worker_log.txt', 'w+')
+    upload_log = open('upload_log.txt', 'w+')
 
     runQuery(secrets.worker1_username, secrets.worker1_password, lonlat, start_2014, end_2014, query_log)
     max2014 = get_total_results(".")
