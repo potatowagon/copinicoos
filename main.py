@@ -23,7 +23,7 @@ def runUpload(dir_path, log):
 
 def get_total_results(dir_path):
     cmd = "cat " + dir_path + "/OSquery-result.xml | grep 'subtitle'"
-    out = subprocess.call(cmd, stdout=subprocess.PIPE, shell=True)
+    out = subprocess.check_output(cmd, shell=True)
     out = out.stdout.read()
     p = re.compile("of (.*) total")
     p.search(out)
