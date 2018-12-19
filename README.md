@@ -1,0 +1,2 @@
+# copinicoos
+copernicus-downloader
