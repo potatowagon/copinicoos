@@ -66,8 +66,18 @@ def main():
     dir_path_2017 = "morocco/2017"
    
     query_log = open('query_log.txt', 'w+')
-    worker_log_2014 = open('worker_log.txt', 'w+')
-    upload_log_2014 = open('upload_log.txt', 'w+')
+
+    worker_log_2014 = open('worker_log_14.txt', 'w+')
+    upload_log_2014 = open('upload_log_14.txt', 'w+')
+
+    worker_log_2015 = open('worker_log_15.txt', 'w+')
+    upload_log_2015 = open('upload_log_15.txt', 'w+')
+
+    worker_log_2016 = open('worker_log_16.txt', 'w+')
+    upload_log_2016 = open('upload_log_16.txt', 'w+')
+
+    worker_log_2017 = open('worker_log_17.txt', 'w+')
+    upload_log_2017 = open('upload_log_17.txt', 'w+')
 
     runQuery(secrets.worker1_username, secrets.worker1_password, lonlat, start_2014, end_2014, query_log)
     max2014 = get_total_results(".")
