@@ -11,16 +11,20 @@ def runQuery(worker_username, worker_password, lonlat, start_date, end_date, log
 
 def runWorker(worker_username, worker_password, lonlat, start_date, end_date, dir_path, max_results, log):
     for page in range(1, max_results + 1):
-        cmd = './dhusget.sh -u ' + str(worker_username) + ' -p ' + str(worker_password) + ' -T GRD -m "Sentinel-1" -c "' + str(lonlat) + '" -S ' + start_date + ' -E ' + end_date + ' -l 1 -P ' + str(page) + ' -o product -O ' + dir_path + ' -w 5 -W 10'
+        cmd = './dhusget.sh -u ' + str(worker_username) + ' -p ' + str(worker_password) + ' -T GRD -m "Sentinel-1" -c "' + str(lonlat) + '" -S ' + start_date + ' -E ' + end_date + ' -l 1 -P ' + str(page) + ' -o product -O ' + dir_path + ' -w 5 -W 30'
         print(cmd)
         subprocess.call(cmd, stdout=log, stderr=log, shell=True)
+        
+        cmd = "git status -s | grep '?? " + dir_path + "' | awk '{ print $2 }' | xargs git add" 
+        subprocess.call(cmd, stdout=log, stderr=log, shell=True)
+        
+        cmd = "git commit 'add file'" 
+        subprocess.call(cmd, stdout=log, stderr=log, shell=True)
+        
+        thread_upload = Thread(target)
 
 def runUpload(dir_path, log):
-    cmd = "git status -s | grep '?? " + dir_path + "' | awk '{ print $2 }' | xargs git add" 
-    subprocess.call(cmd, stdout=log, stderr=log, shell=True)
-    cmd = "git commit 'add file'" 
-    subprocess.call(cmd, stdout=log, stderr=log, shell=True)
-    cmd = "git push" 
+    cmd = "git push data master" 
     subprocess.call(cmd, stdout=log, stderr=log, shell=True)
 
 def get_total_results(dir_path):
@@ -58,13 +62,24 @@ def main():
 
     runQuery(secrets.worker1_username, secrets.worker1_password, lonlat, start_2014, end_2014, query_log)
     max2014 = get_total_results(".")
-    print(max2014)
+    print("total results in 2014: " + max2014)
+    
     runQuery(secrets.worker2_username, secrets.worker2_password, lonlat, start_2015, end_2015, query_log)
     max2015 = get_total_results(".")
+    print("total results in 2015: " + max2015) 
 
-    thread_2014 = Thread(target=runWorker, args=(secrets.worker1_username, secrets.worker1_password, lonlat, start_2014, end_2014, dir_path_2014, 2, worker_log_2014)) 
-    print("here")
-    thread_2014.start()
+    runQuery(secrets.worker3_username, secrets.worker3_password, lonlat, start_2016, end_2016, query_log)
+    max2016 = get_total_results(".")
+    print("total results in 2016: " + max2016)
+    
+    runQuery(secrets.worker4_username, secrets.worker4_password, lonlat, start_2017, end_2017, query_log)
+    max2017 = get_total_results(".")
+    print("total results in 2017: " + max2017)
+    
+    #thread_2014 = Thread(target=runWorker, args=(secrets.worker1_username, secrets.worker1_password, lonlat, start_2014, end_2014, dir_path_2014, max2014, worker_log_2014)) 
+    thread_2017 = Thread(target=runWorker, args=(secrets.worker4_username, secrets.worker4_password, lonlat, start_2017, end_2017, dir_path_2017, max2017, worker_log_2017)) 
+    
+    #thread_2014.start()
 
 if __name__ == "__main__":
     main()
