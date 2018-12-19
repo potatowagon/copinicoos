@@ -60,8 +60,7 @@ def main():
     runQuery(secrets.worker2_username, secrets.worker2_password, lonlat, start_2015, end_2015, query_log)
     max2015 = get_total_results(".")
 
-    #thread_2014 = Thread(target=runWorker, args=(secrets.worker1_username, secrets.worker1_password, lonlat, dir_path_2014, max2014, query_log_2014)) 
-    thread_2014 = Thread(target=runWorker, args=(secrets.worker1_username, secrets.worker1_password, lonlat, dir_path_2014, 1, worker_log_2014)) 
+    thread_2014 = Thread(target=runWorker, args=(secrets.worker1_username, secrets.worker1_password, lonlat, start_2014, end_2014, dir_path_2014, 1, worker_log_2014)) 
 
     thread_2014.start()
 
