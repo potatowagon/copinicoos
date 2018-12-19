@@ -51,7 +51,7 @@ def main():
     dir_path_2016 = "morocco/2016"
     dir_path_2017 = "morocco/2017"
    
-    query_log_2014 = open('query_log.txt', 'w+')
+    query_log = open('query_log.txt', 'w+')
     worker_log_2014 = open('worker_log.txt', 'w+')
     upload_log_2014 = open('upload_log.txt', 'w+')
 
