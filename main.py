@@ -13,12 +13,12 @@ def runWorker(worker_username, worker_password, lonlat, start_date, end_date, di
     for page in range(1, int(max_results) + 1):
         cmd = './dhusget.sh -u ' + str(worker_username) + ' -p ' + str(worker_password) + ' -T GRD -m "Sentinel-1" -c "' + str(lonlat) + '" -S ' + start_date + ' -E ' + end_date + ' -l 1 -P ' + str(page) + ' -o product -O ' + dir_path + ' -w 5 -W 30'
         print(cmd)
-        subprocess.call(cmd, stdout=log, stderr=log, shell=True)
+        subprocess.call(cmd, stdout=worker_log, stderr=worker_log, shell=True)
         
         new_file = untracked_file_name(dir_path)
         
         cmd = "git status -s | grep '?? " + dir_path + "' | awk '{ print $2 }' | xargs git add" 
-        subprocess.call(cmd, stdout=log, stderr=log, shell=True)
+        subprocess.call(cmd, stdout=worker_log, stderr=worker_log, shell=True)
 
         cmd = "git commit 'add file'" 
         subprocess.call(cmd, stdout=worker_log, stderr=worker_log, shell=True)
