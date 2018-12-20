@@ -88,17 +88,24 @@ def main():
    
     query_log = open('query_log.txt', 'w+')
 
-    worker_log_2014 = open('worker_log_14.txt', 'w+')
-    upload_log_2014 = open('upload_log_14.txt', 'w+')
+    progress_2014 = open(dir_path_2014 + '/progress_2014.txt', 'r+')
+    worker_log_2014 = open(dir_path_2014 + '/worker_log_14.txt', 'w+')
+    upload_log_2014 = open(dir_path_2014 + '/upload_log_14.txt', 'w+')
 
-    worker_log_2015 = open('worker_log_15.txt', 'w+')
-    upload_log_2015 = open('upload_log_15.txt', 'w+')
+    progress_2015 = open(dir_path_2015 + '/progress_2015.txt', 'r+')
+    worker_log_2015 = open(dir_path_2015 + '/worker_log_15.txt', 'w+')
+    upload_log_2015 = open(dir_path_2015 + '/upload_log_15.txt', 'w+')
 
-    worker_log_2016 = open('worker_log_16.txt', 'w+')
-    upload_log_2016 = open('upload_log_16.txt', 'w+')
+    progress_2016 = open(dir_path_2016 + '/progress_2016.txt', 'r+')
+    worker_log_2016 = open(dir_path_2016 + '/worker_log_16.txt', 'w+')
+    upload_log_2016 = open(dir_path_2016 + '/upload_log_16.txt', 'w+')
 
-    worker_log_2017 = open('worker_log_17.txt', 'w+')
-    upload_log_2017 = open('upload_log_17.txt', 'w+')
+    progress_2017 = open(dir_path_2017 + '/progress_2017.txt', 'r+')
+    worker_log_2017 = open(dir_path_2017 + '/worker_log_17.txt', 'w+')
+    upload_log_2017 = open(dir_path_2017 + '/upload_log_17.txt', 'w+')
+
+    cmd = "git add --all" 
+    subprocess.call(cmd, shell=True)
 
     runQuery(secrets.worker1_username, secrets.worker1_password, lonlat, start_2014, end_2014, query_log)
     max2014 = get_total_results(".")
