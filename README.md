@@ -1,5 +1,5 @@
 # Copinicoos
-copernicus-downloader
+Copernicus-downloader. Downloads in seperate threads, and uploads to a remote git repository so Windows users may access it too.
 
 ### Installation
 First install python. Then clone this repository. Runs only on Unix systems, ie. Linux and Mac
