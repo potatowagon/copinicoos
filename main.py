@@ -54,6 +54,7 @@ def overwrite_file(file_path, msg):
     file_o = open(file_path, 'w+')
     file_o.write(msg)
     file_o.seek(0)
+    file_o.close()
 
 def main():
     lonlat = "-6.117176708154047,35.429154357361384:-5.998938062810441,35.579892441113685" #morocco, allysah
