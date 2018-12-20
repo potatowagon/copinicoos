@@ -6,7 +6,7 @@ import secrets
 import re
 
 def runQuery(worker_username, worker_password, lonlat, start_date, end_date, log):
-    cmd = './dhusget.sh -u ' + str(worker_username) + ' -p ' + str(worker_password) + ' -T GRD -m "Sentinel-1" -c "' + str(lonlat) + '" -S ' + start_date + ' -E ' + end_date
+    cmd = './dhusget.sh -u ' + str(worker_username) + ' -p ' + str(worker_password) + ' -T GRD -m "Sentinel-1" -c "' + str(lonlat) + '" -S ' + start_date + ' -E ' + end_date + ' -l 1 -P 1'
     subprocess.call(cmd, stdout=log, stderr=log, shell=True)
 
 def runWorker(worker_username, worker_password, lonlat, start_date, end_date, dir_path, resume, max_results, worker_log, upload_log):
@@ -38,7 +38,7 @@ def runUpload(new_file, log):
 def get_total_results(dir_path):
     cmd = "cat " + dir_path + "/OSquery-result.xml | grep 'subtitle'"
     out = subprocess.check_output(cmd, shell=True)
-    p = re.compile("Displaying (.*) results")
+    p = re.compile("of (.*) total")
     max = p.search(out)
     return max.group(1)
 
