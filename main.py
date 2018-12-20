@@ -86,16 +86,16 @@ def main():
     dir_path_2016 = "morocco/2016"
     dir_path_2017 = "morocco/2017"
 
-    cmd = "mkdir -p" + dir_path_2014
+    cmd = "mkdir -p " + dir_path_2014
     subprocess.call(cmd, shell=True)
 
-    cmd = "mkdir -p" + dir_path_2015
+    cmd = "mkdir -p " + dir_path_2015
     subprocess.call(cmd, shell=True)
 
-    cmd = "mkdir -p" + dir_path_2016
+    cmd = "mkdir -p " + dir_path_2016
     subprocess.call(cmd, shell=True)
 
-    cmd = "mkdir -p" + dir_path_2017
+    cmd = "mkdir -p " + dir_path_2017
     subprocess.call(cmd, shell=True)
    
     query_log = open('query_log.txt', 'w+')
