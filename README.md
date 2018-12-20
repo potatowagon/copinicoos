@@ -16,7 +16,7 @@ git remote add data <my remote repository>
 ```
 
 #### Set Copernicus Open Hub accounts
-This bot uses 4 Copernicus open hub accounts do download 4 items simultaneously. An empty `secrets.py` file has been created during the setup phase. Please fill in the following in secrets.py
+This bot uses 4 Copernicus open hub accounts to download 4 items simultaneously. An empty `secrets.py` file has been created during the setup phase. Please fill in the following in secrets.py
 
 ```
 worker1_username = "fill in username"
@@ -34,7 +34,7 @@ worker4_password = "fill in password"
 ```
 
 ### Run
-Edit `main.py` to adjust search query. For examaple, lonlat sepcifies query location, start_date, end_date specifies query sensing time window.
+Edit `main.py` to adjust search query. For examaple, lonlat sepcifies query location, start_date and end_date specifies query sensing time window.
 
 To run
 ```
