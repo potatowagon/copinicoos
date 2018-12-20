@@ -1,5 +1,5 @@
 # Copinicoos
-Copernicus-downloader. Downloads in seperate threads, and uploads to a remote git repository so Windows users may access it too. Made to run unattended on a server.
+Copernicus-downloader. Downloads in seperate threads, and uploads to a remote git repository so Windows users may access it too. The data on local is deleted after it is uploaded to minimise disk usage. Made to run unattended on a server.
 
 ### Installation
 First install python. Then clone this repository. Runs only on Unix systems, ie. Linux and Mac
