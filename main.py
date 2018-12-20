@@ -10,6 +10,25 @@ def runQuery(worker_username, worker_password, lonlat, start_date, end_date, log
     subprocess.call(cmd, stdout=log, stderr=log, shell=True)
 
 def runWorker(worker_username, worker_password, lonlat, start_date, end_date, dir_path, max_results, worker_log, upload_log):
+    
+        cmd = './dhusget.sh -u ' + str(worker_username) + ' -p ' + str(worker_password) + ' -T GRD -m "Sentinel-1" -c "' + str(lonlat) + '" -S ' + start_date + ' -E ' + end_date + ' -l 1 -P 9 -o product -O ' + dir_path + ' -w 5 -W 30'
+        print(cmd)
+        subprocess.call(cmd, stdout=worker_log, stderr=worker_log, shell=True)
+
+        new_file = untracked_file_name(dir_path)
+        print(new_file)
+
+        cmd = "git status -s | grep '?? " + dir_path + "' | awk '{ print $2 }' | xargs git add" 
+        subprocess.call(cmd, stdout=worker_log, stderr=worker_log, shell=True)
+
+        cmd = "git commit 'add file'" 
+        subprocess.call(cmd, stdout=worker_log, stderr=worker_log, shell=True)
+
+        thread_upload = Thread(target=runUpload, args=(new_file, upload_log))
+        thread_upload.start()
+
+
+    '''
     for page in range(1, int(max_results) + 1):
         cmd = './dhusget.sh -u ' + str(worker_username) + ' -p ' + str(worker_password) + ' -T GRD -m "Sentinel-1" -c "' + str(lonlat) + '" -S ' + start_date + ' -E ' + end_date + ' -l 1 -P ' + str(page) + ' -o product -O ' + dir_path + ' -w 5 -W 30'
         print(cmd)
@@ -26,7 +45,7 @@ def runWorker(worker_username, worker_password, lonlat, start_date, end_date, di
         
         thread_upload = Thread(target=runUpload, args=(new_file, upload_log))
         thread_upload.start()
-
+     '''   
 def runUpload(new_file, log):
     cmd = "git push data master" 
     subprocess.call(cmd, stdout=log, stderr=log, shell=True)
@@ -98,7 +117,7 @@ def main():
     print("total results in 2017: " + max2017)
     
     #thread_2014 = Thread(target=runWorker, args=(secrets.worker1_username, secrets.worker1_password, lonlat, start_2014, end_2014, dir_path_2014, max2014, worker_log_2014)) 
-    thread_2017 = Thread(target=runWorker, args=(secrets.worker4_username, secrets.worker4_password, lonlat, start_2017, end_2017, dir_path_2017, 1, worker_log_2017, upload_log_2017)) 
+    thread_2017 = Thread(target=runWorker, args=(secrets.worker4_username, secrets.worker4_password, lonlat, start_2017, end_2017, dir_path_2017, max2017, worker_log_2017, upload_log_2017)) 
     
     #thread_2014.start()
     thread_2017.start()
