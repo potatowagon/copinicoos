@@ -12,7 +12,7 @@ def runQuery(worker_username, worker_password, lonlat, start_date, end_date, log
 def runWorker(worker_username, worker_password, lonlat, start_date, end_date, dir_path, resume, max_results, worker_log, upload_log):
     for page in range(int(resume), int(max_results) + 1):
         overwrite_file(dir_path + '/progress.txt', str(page))
-        cmd = dir_path + '/dhusget.sh -u ' + str(worker_username) + ' -p ' + str(worker_password) + ' -T GRD -m "Sentinel-1" -c "' + str(lonlat) + '" -S ' + start_date + ' -E ' + end_date + ' -l 1 -P ' + str(page) + ' -o product -w 5 -W 30 -L ' + "."
+        cmd = './dhusget.sh -u ' + str(worker_username) + ' -p ' + str(worker_password) + ' -T GRD -m "Sentinel-1" -c "' + str(lonlat) + '" -S ' + start_date + ' -E ' + end_date + ' -l 1 -P ' + str(page) + ' -o product -w 5 -W 30 -L ' + dir_path
         print(cmd)
         subprocess.call(cmd, stdout=worker_log, stderr=worker_log, shell=True)
 
@@ -95,6 +95,7 @@ def main():
     cmd = "mkdir -p " + dir_path_2017
     subprocess.call(cmd, shell=True)
 
+    '''
     cmd = "cp ./dhusget.sh " + dir_path_2014
     subprocess.call(cmd, shell=True)
     cmd = "chmod +x " + dir_path_2014 + "/dhusget.sh"
@@ -104,7 +105,8 @@ def main():
     subprocess.call(cmd, shell=True)
     cmd = "chmod +x " + dir_path_2017 + "/dhusget.sh"
     subprocess.call(cmd, shell=True)
-   
+    '''
+    
     query_log = open('query_log.txt', 'w+')
 
     progress_2014 = open(dir_path_2014 + '/progress.txt', 'a+')
