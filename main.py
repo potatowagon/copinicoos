@@ -11,7 +11,7 @@ def runQuery(worker_username, worker_password, lonlat, start_date, end_date, log
 
 def runWorker(worker_username, worker_password, lonlat, start_date, end_date, dir_path, resume, max_results, worker_log, upload_log):
     for page in range(int(resume), int(max_results) + 1):
-        overwrite_file(dir_path + '/progress.txt', str(resume))
+        overwrite_file(dir_path + '/progress.txt', str(page))
         cmd = './dhusget.sh -u ' + str(worker_username) + ' -p ' + str(worker_password) + ' -T GRD -m "Sentinel-1" -c "' + str(lonlat) + '" -S ' + start_date + ' -E ' + end_date + ' -l 1 -P ' + str(page) + ' -o product -O ' + dir_path + ' -w 5 -W 30'
         print(cmd)
         subprocess.call(cmd, stdout=worker_log, stderr=worker_log, shell=True)
@@ -149,10 +149,10 @@ def main():
     max2017 = get_total_results(".")
     print("total results in 2017: " + max2017)
     
-    #thread_2014 = Thread(target=runWorker, args=(secrets.worker1_username, secrets.worker1_password, lonlat, start_2014, end_2014, dir_path_2014, max2014, worker_log_2014)) 
+    thread_2014 = Thread(target=runWorker, args=(secrets.worker1_username, secrets.worker1_password, lonlat, start_2014, end_2014, dir_path_2014, resume14, max2014, worker_log_2014, upload_log_2014)) 
     thread_2017 = Thread(target=runWorker, args=(secrets.worker4_username, secrets.worker4_password, lonlat, start_2017, end_2017, dir_path_2017, resume17, max2017, worker_log_2017, upload_log_2017)) 
     
-    #thread_2014.start()
+    thread_2014.start()
     thread_2017.start()
 
 if __name__ == "__main__":
