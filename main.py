@@ -112,7 +112,7 @@ def main():
     worker_log_2016 = open(dir_path_2016 + '/worker_log_16.txt', 'w+')
     upload_log_2016 = open(dir_path_2016 + '/upload_log_16.txt', 'w+')
 
-    progress_2017 = open(dir_path_2017 + '/progress_2017.txt', 'r+')
+    progress_2017 = open(dir_path_2017 + '/progress_2017.txt', 'w+')
     worker_log_2017 = open(dir_path_2017 + '/worker_log_17.txt', 'w+')
     upload_log_2017 = open(dir_path_2017 + '/upload_log_17.txt', 'w+')
 
