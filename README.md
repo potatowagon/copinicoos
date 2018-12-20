@@ -2,12 +2,13 @@
 copernicus-downloader
 
 ### Installation
-First install python. Then clone this repository. Runs only on Unix systems, ie Linux and Mac
+First install python. Then clone this repository. Runs only on Unix systems, ie. Linux and Mac
 
 ### Setup 
 cd to cloned repository, and give run access to the setup script
 ```
 chmod +x setup.sh
+./setup.sh
 ```
 
 #### Set Remote repository
