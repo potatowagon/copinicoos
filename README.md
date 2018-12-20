@@ -36,7 +36,7 @@ worker4_password = "fill in password"
 ```
 
 ### Run
-Edit `main.py` to adjust search query. For examaple, lonlat sepcifies query location, start_date and end_date specifies query sensing time window.
+Edit `main.py` to adjust search query. For examaple, `lonlat` sepcifies query location, `start_date` and `end_date` specifies query sensing time window.
 
 To run
 ```
