@@ -100,15 +100,15 @@ def main():
    
     query_log = open('query_log.txt', 'w+')
 
-    progress_2014 = open(dir_path_2014 + '/progress_2014.txt', 'r+')
+    progress_2014 = open(dir_path_2014 + '/progress_2014.txt', 'w+')
     worker_log_2014 = open(dir_path_2014 + '/worker_log_14.txt', 'w+')
     upload_log_2014 = open(dir_path_2014 + '/upload_log_14.txt', 'w+')
 
-    progress_2015 = open(dir_path_2015 + '/progress_2015.txt', 'r+')
+    progress_2015 = open(dir_path_2015 + '/progress_2015.txt', 'w+')
     worker_log_2015 = open(dir_path_2015 + '/worker_log_15.txt', 'w+')
     upload_log_2015 = open(dir_path_2015 + '/upload_log_15.txt', 'w+')
 
-    progress_2016 = open(dir_path_2016 + '/progress_2016.txt', 'r+')
+    progress_2016 = open(dir_path_2016 + '/progress_2016.txt', 'w+')
     worker_log_2016 = open(dir_path_2016 + '/worker_log_16.txt', 'w+')
     upload_log_2016 = open(dir_path_2016 + '/upload_log_16.txt', 'w+')
 
