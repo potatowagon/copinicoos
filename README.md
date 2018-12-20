@@ -3,6 +3,9 @@ Copernicus-downloader. Downloads all the results in a search query in seperate t
 
 ### Installation
 First install python. Then clone this repository. Runs only on Unix systems, ie. Linux and Mac
+```
+git clone https://github.com/potatowagon/copinicoos.git
+```
 
 ### Setup 
 cd to cloned repository, and give run access to the setup script
