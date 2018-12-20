@@ -48,7 +48,7 @@ def untracked_file_name(dir_path):
 
 def read_file(file_r):
     file_r.seek(0)
-    return file.read()
+    return file_r.read()
 
 def overwrite_file(file_path, msg):
     file_o = open(file_path, 'w+')
