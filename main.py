@@ -16,6 +16,7 @@ def runWorker(worker_username, worker_password, lonlat, start_date, end_date, di
         subprocess.call(cmd, stdout=worker_log, stderr=worker_log, shell=True)
         
         new_file = untracked_file_name(dir_path)
+        print(new_file)
         
         cmd = "git status -s | grep '?? " + dir_path + "' | awk '{ print $2 }' | xargs git add" 
         subprocess.call(cmd, stdout=worker_log, stderr=worker_log, shell=True)
@@ -97,7 +98,7 @@ def main():
     print("total results in 2017: " + max2017)
     
     #thread_2014 = Thread(target=runWorker, args=(secrets.worker1_username, secrets.worker1_password, lonlat, start_2014, end_2014, dir_path_2014, max2014, worker_log_2014)) 
-    thread_2017 = Thread(target=runWorker, args=(secrets.worker4_username, secrets.worker4_password, lonlat, start_2017, end_2017, dir_path_2017, max2017, worker_log_2017, upload_log_2017)) 
+    thread_2017 = Thread(target=runWorker, args=(secrets.worker4_username, secrets.worker4_password, lonlat, start_2017, end_2017, dir_path_2017, 1, worker_log_2017, upload_log_2017)) 
     
     #thread_2014.start()
     thread_2017.start()
