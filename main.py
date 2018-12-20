@@ -10,7 +10,7 @@ def runQuery(worker_username, worker_password, lonlat, start_date, end_date, log
     subprocess.call(cmd, stdout=log, stderr=log, shell=True)
 
 def runWorker(worker_username, worker_password, lonlat, start_date, end_date, dir_path, resume, max_results, worker_log, upload_log):
-    for page in range(resume, int(max_results) + 1):
+    for page in range(int(resume), int(max_results) + 1):
         overwrite_file(dir_path + '/progress.txt', str(resume))
         cmd = './dhusget.sh -u ' + str(worker_username) + ' -p ' + str(worker_password) + ' -T GRD -m "Sentinel-1" -c "' + str(lonlat) + '" -S ' + start_date + ' -E ' + end_date + ' -l 1 -P ' + page + ' -o product -O ' + dir_path + ' -w 5 -W 30'
         print(cmd)
