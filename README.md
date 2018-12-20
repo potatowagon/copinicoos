@@ -12,6 +12,7 @@ chmod +x setup.sh
 ```
 
 #### Set Remote repository
+The git repository where downloaded data will be uploaded to.
 ```
 git remote add data <my remote repository>
 ```
