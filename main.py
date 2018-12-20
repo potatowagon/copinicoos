@@ -22,6 +22,9 @@ def runWorker(worker_username, worker_password, lonlat, start_date, end_date, di
         cmd = "git status -s | grep '?? " + dir_path + "' | awk '{ print $2 }' | xargs git add" 
         subprocess.call(cmd, stdout=worker_log, stderr=worker_log, shell=True)
 
+        cmd = "git add " + dir_path + "/progress.txt" 
+        subprocess.call(cmd, stdout=worker_log, stderr=worker_log, shell=True)
+
         cmd = "git commit -m'add file'" 
         subprocess.call(cmd, stdout=worker_log, stderr=worker_log, shell=True)
 
