@@ -21,7 +21,7 @@ def runWorker(worker_username, worker_password, lonlat, start_date, end_date, di
     cmd = "git status -s | grep '?? " + dir_path + "' | awk '{ print $2 }' | xargs git add" 
     subprocess.call(cmd, stdout=worker_log, stderr=worker_log, shell=True)
 
-    cmd = "git commit 'add file'" 
+    cmd = "git commit -m'add file'" 
     subprocess.call(cmd, stdout=worker_log, stderr=worker_log, shell=True)
 
     thread_upload = Thread(target=runUpload, args=(new_file, upload_log))
