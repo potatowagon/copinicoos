@@ -1,8 +1,11 @@
 # Copinicoos
-copernicus-downloader
+Copernicus-downloader. Downloads all the results in a search query in seperate threads, and uploads to a remote git repository so Windows users may access it too. The data on local is deleted after it is uploaded to minimise disk usage. Made to run unattended on a server.
 
 ### Installation
-First install python. Then clone this repository. Runs only on Unix systems, ie. Linux and Mac
+First install python. Then clone or download (.zip) this repository. Runs only on Unix systems, ie. Linux and Mac
+```
+git clone https://github.com/potatowagon/copinicoos.git
+```
 
 ### Setup 
 cd to cloned repository, and give run access to the setup script
@@ -36,7 +39,7 @@ worker4_password = "fill in password"
 ```
 
 ### Run
-Edit `main.py` to adjust search query. For examaple, lonlat sepcifies query location, start_date and end_date specifies query sensing time window.
+Edit `main.py` to adjust search query. For examaple, `lonlat` sepcifies query location, `start_date` and `end_date` specifies query sensing time window.
 
 To run
 ```
