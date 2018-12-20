@@ -11,21 +11,21 @@ def runQuery(worker_username, worker_password, lonlat, start_date, end_date, log
 
 def runWorker(worker_username, worker_password, lonlat, start_date, end_date, dir_path, max_results, worker_log, upload_log):
     
-        cmd = './dhusget.sh -u ' + str(worker_username) + ' -p ' + str(worker_password) + ' -T GRD -m "Sentinel-1" -c "' + str(lonlat) + '" -S ' + start_date + ' -E ' + end_date + ' -l 1 -P 9 -o product -O ' + dir_path + ' -w 5 -W 30'
-        print(cmd)
-        subprocess.call(cmd, stdout=worker_log, stderr=worker_log, shell=True)
+    cmd = './dhusget.sh -u ' + str(worker_username) + ' -p ' + str(worker_password) + ' -T GRD -m "Sentinel-1" -c "' + str(lonlat) + '" -S ' + start_date + ' -E ' + end_date + ' -l 1 -P 9 -o product -O ' + dir_path + ' -w 5 -W 30'
+    print(cmd)
+    subprocess.call(cmd, stdout=worker_log, stderr=worker_log, shell=True)
 
-        new_file = untracked_file_name(dir_path)
-        print(new_file)
+    new_file = untracked_file_name(dir_path)
+    print(new_file)
 
-        cmd = "git status -s | grep '?? " + dir_path + "' | awk '{ print $2 }' | xargs git add" 
-        subprocess.call(cmd, stdout=worker_log, stderr=worker_log, shell=True)
+    cmd = "git status -s | grep '?? " + dir_path + "' | awk '{ print $2 }' | xargs git add" 
+    subprocess.call(cmd, stdout=worker_log, stderr=worker_log, shell=True)
 
-        cmd = "git commit 'add file'" 
-        subprocess.call(cmd, stdout=worker_log, stderr=worker_log, shell=True)
+    cmd = "git commit 'add file'" 
+    subprocess.call(cmd, stdout=worker_log, stderr=worker_log, shell=True)
 
-        thread_upload = Thread(target=runUpload, args=(new_file, upload_log))
-        thread_upload.start()
+    thread_upload = Thread(target=runUpload, args=(new_file, upload_log))
+    thread_upload.start()
 
 
     '''
