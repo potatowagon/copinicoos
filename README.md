@@ -50,4 +50,5 @@ python main.py
 
 ```
 find . -name dhusget_lock -type d -exec rm -r {} +
+find . -name dhusget_tmp -type d -exec rm -r {} +
 ```
