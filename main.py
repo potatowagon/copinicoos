@@ -5,6 +5,7 @@ from threading import Thread
 from multiprocessing import Process
 import secrets
 import re
+import time
 
 def runQuery(worker_username, worker_password, lonlat, start_date, end_date, log):
     cmd = './dhusget.sh -u ' + str(worker_username) + ' -p ' + str(worker_password) + ' -T GRD -m "Sentinel-1" -c "' + str(lonlat) + '" -S ' + start_date + ' -E ' + end_date + ' -l 1 -P 1'
@@ -164,6 +165,7 @@ def main():
     thread_2017 = Process(target=runWorker, args=(secrets.worker4_username, secrets.worker4_password, lonlat, start_2017, end_2017, dir_path_2017, resume17, max2017, worker_log_2017, upload_log_2017)) 
     
     thread_2014.start()
+    time.sleep(10)
     thread_2017.start()
 
 if __name__ == "__main__":
