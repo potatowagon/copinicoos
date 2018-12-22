@@ -45,3 +45,9 @@ To run
 ```
 python main.py
 ```
+
+### Troubleshoot
+
+```
+find . -name dhusget_lock -type d -exec rm -r {} +
+```
