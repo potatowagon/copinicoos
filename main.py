@@ -292,6 +292,7 @@ def main():
     worker2014.set_name("2014")
     worker2014.set_query(lonlat, start_2014, end_2014)
     worker2014.setup()
+    worker2014.run_query()
     worker2014.start_download()
 
 if __name__ == "__main__":
