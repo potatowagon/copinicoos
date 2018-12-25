@@ -172,6 +172,16 @@ def main():
     worker2014.set_query(lonlat, start_2014, end_2014)
     worker2014.start_download()
 
+    worker2015 = Worker(secrets.worker2_username, secrets.worker2_password, dir_path_2015)
+    worker2015.set_name("2015")
+    worker2015.set_query(lonlat, start_2015, end_2015)
+    worker2015.start_download()
+
+    worker2016 = Worker(secrets.worker3_username, secrets.worker3_password, dir_path_2016)
+    worker2016.set_name("2016")
+    worker2016.set_query(lonlat, start_2016, end_2016)
+    worker2016.start_download()
+
     worker2017 = Worker(secrets.worker4_username, secrets.worker4_password, dir_path_2017)
     worker2017.set_name("2017")
     worker2017.set_query(lonlat, start_2017, end_2017)
