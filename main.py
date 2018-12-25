@@ -113,7 +113,7 @@ class Worker():
             subprocess.call(cmd, stdout=self.worker_log, stderr=self.worker_log, shell=True)
 
             cmd = "git commit -m'add file'" 
-            subprocess.call(cmd, stdout=worker_log, stderr=worker_log, shell=True)
+            subprocess.call(cmd, stdout=self.worker_log, stderr=self.worker_log, shell=True)
 
             thread_upload = Thread(target=self._run_upload, args=(new_file, self.upload_log))
             #thread_upload.start()
