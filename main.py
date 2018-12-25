@@ -105,7 +105,7 @@ class Worker():
             print(cmd)
             subprocess.call(cmd, stdout=self.worker_log, stderr=self.worker_log, shell=True)
 
-            new_file = self._untracked_file_name(self.workdir)
+            new_file = self._untracked_file_name()
             print(new_file)
 
             cmd = "git status -s | grep '?? " + self.workdir + "' | awk '{ print $2 }' | xargs git add" 
@@ -159,7 +159,7 @@ def main():
     worker2014.set_query(lonlat, start_2014, end_2014)
     worker2014.start_download()
 
-    worker2017 = Worker(secrets.worker2_username, secrets.worker2_password, dir_path_2017)
+    worker2017 = Worker(secrets.worker4_username, secrets.worker4_password, dir_path_2017)
     worker2017.set_name("2017")
     worker2017.set_query(lonlat, start_2017, end_2017)
     worker2017.start_download()
