@@ -86,7 +86,7 @@ class Worker():
         cmd = self.workdir + '/dhusget.sh -u ' + str(self.username) + ' -p ' + str(self.password) + ' -T GRD -m "Sentinel-1" -c "' + str(self.lonlat) + '" -S ' + str(self.start_date) + ' -E ' + str(self.end_date) + ' -l 1 -P 1 -L ' + self.workdir +'/dhusget_lock -q ' + self.workdir + '/OSquery-result.xml' 
         subprocess.call(cmd, stdout=self.worker_log, stderr=self.worker_log, shell=True)
         self.total_results = self._get_total_results()  
-        print("total results in " + self.name + ": " + self.total_results)      
+        print("\ntotal results in " + self.name + ": " + self.total_results + "\n")      
 
     def _get_total_results(self):
         cmd = "cat " + self.workdir + "/OSquery-result.xml | grep 'subtitle'"
@@ -102,7 +102,7 @@ class Worker():
         self.process.start()
 
     def _hold_lock(self):
-        print(self.name + "has the lock. Begin downloading...")
+        print(self.name + " has the lock. Begin downloading...")
         time.sleep(5)
         self.request_lock.release()
 
