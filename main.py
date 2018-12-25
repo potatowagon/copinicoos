@@ -42,13 +42,13 @@ class Worker():
     def set_end_date(self, end_date):
         self.end_date = end_date
 
-    def _read_file(file_r):
+    def _read_file(self, file_r):
         file_r.seek(0)
         out = file_r.read()
         file_r.close()
         return out
 
-    def _overwrite_file(file_path, msg):
+    def _overwrite_file(self, file_path, msg):
         file_o = open(file_path, 'w+')
         file_o.write(msg)
         file_o.seek(0)
@@ -117,7 +117,7 @@ class Worker():
             thread_upload = Thread(target=self.run_upload, args=(new_file, self.upload_log))
             #thread_upload.start()
 
-    def run_upload(new_file, log):
+    def run_upload(self, new_file, log):
         cmd = "git push data master" 
         subprocess.call(cmd, stdout=log, stderr=log, shell=True)
 
