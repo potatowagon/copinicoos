@@ -8,7 +8,7 @@ import re
 import time
 
 def runQuery(worker_username, worker_password, lonlat, start_date, end_date, log):
-    cmd = './dhusget.sh -u ' + str(worker_username) + ' -p ' + str(worker_password) + ' -T GRD -m "Sentinel-1" -c "' + str(lonlat) + '" -S ' + start_date + ' -E ' + end_date + ' -l 1 -P 1'
+    cmd = './dhusget.sh -u ' + str(worker_username) + ' -p ' + str(worker_password) + ' -T GRD -m "Sentinel-1" -c "' + str(lonlat) + '" -S ' + start_date + ' -E ' + end_date + ' -l 1 -P 1 -L ./dhusget_lock'
     subprocess.call(cmd, stdout=log, stderr=log, shell=True)
 
 def runWorker(worker_username, worker_password, lonlat, start_date, end_date, dir_path, resume, max_results, worker_log, upload_log):
