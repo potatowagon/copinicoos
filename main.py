@@ -93,9 +93,10 @@ class Worker():
         return max.group(1)
 
     def start_download(self):
-        self.process = Process(target=self.run_worker)
+        self.process = Process(target=self._run_worker)
+        self.process.start()
 
-    def run_worker(self):
+    def _run_worker(self):
         for page in range(int(self.resume), int(self.total_results) + 1):
             self._overwrite_file(self.workdir + '/progress.txt', str(page))
             cmd = self.workdir + '/dhusget.sh -u ' + str(self.username) + ' -p ' + str(self.password) + ' -T GRD -m "Sentinel-1" -c "' + str(self.lonlat) + '" -S ' + self.start_date + ' -E ' + self.end_date + ' -l 1 -P ' + str(page) + ' -o product -O ' + self.workdir + ' -w 5 -W 30 -L ' + self.workdir + '/dhusget_lock -n 4 -q ' + self.workdir + '/OSquery-result.xml -C ' + self.workdir + '/products-list.csv'
@@ -114,10 +115,10 @@ class Worker():
             cmd = "git commit -m'add file'" 
             subprocess.call(cmd, stdout=worker_log, stderr=worker_log, shell=True)
 
-            thread_upload = Thread(target=self.run_upload, args=(new_file, self.upload_log))
+            thread_upload = Thread(target=self._run_upload, args=(new_file, self.upload_log))
             #thread_upload.start()
 
-    def run_upload(self, new_file, log):
+    def _run_upload(self, new_file, log):
         cmd = "git push data master" 
         subprocess.call(cmd, stdout=log, stderr=log, shell=True)
 
