@@ -3,11 +3,14 @@ import sys  # sys.exit
 import subprocess
 from threading import Thread
 from multiprocessing import Process
+from multiprocessing import Lock
 import secrets
 import re
 import time
 
 class Worker():
+    request_lock = Lock()
+
     def __init__(self, username, password, workdir):
         self.username = username
         self.password = password
@@ -98,9 +101,19 @@ class Worker():
         self.process = Process(target=self._run_worker)
         self.process.start()
 
+    def _hold_lock(self):
+        print(self.name + "has the lock. Begin downloading...")
+        time.sleep(5)
+        self.request_lock.release()
+
     def _run_worker(self):
         for page in range(int(self.resume), int(self.total_results) + 1):
             self._overwrite_file(self.workdir + '/progress.txt', str(page))
+
+            self.request_lock.acquire()
+            hold_lock_thread = Thread(target=self._hold_lock)
+            hold_lock_thread.start()
+
             cmd = self.workdir + '/dhusget.sh -u ' + str(self.username) + ' -p ' + str(self.password) + ' -T GRD -m "Sentinel-1" -c "' + str(self.lonlat) + '" -S ' + self.start_date + ' -E ' + self.end_date + ' -l 1 -P ' + str(page) + ' -o product -O ' + self.workdir + ' -w 5 -W 30 -L ' + self.workdir + '/dhusget_lock -n 4 -q ' + self.workdir + '/OSquery-result.xml -C ' + self.workdir + '/products-list.csv'
             print(cmd)
             subprocess.call(cmd, stdout=self.worker_log, stderr=self.worker_log, shell=True)
