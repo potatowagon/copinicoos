@@ -296,5 +296,12 @@ def main():
     worker2014.run_query()
     worker2014.start_download()
 
+    worker2017 = Worker(secrets.worker2_username, secrets.worker2_password, dir_path_2017)
+    worker2017.set_name("2017")
+    worker2017.set_query(lonlat, start_2017, end_2017)
+    worker2017.setup()
+    worker2017.run_query()
+    worker2017.start_download()
+
 if __name__ == "__main__":
     main()
