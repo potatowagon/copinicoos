@@ -13,9 +13,9 @@ Copernicus-downloader. Downloads all the results in a search query in seperate p
       - [Github](#github)
       - [Google drive](#google-drive)
     + [Troubleshoot](#troubleshoot)
-    
+
 ### Why
-* Most of the old data are offline. Old data is needed when comparing changes across time. Offline data have to first be made online before download can happen, and this can take anywhere from 20 mins to 24 hours. There is no notification system on Openhub when an offline product is made online. Hence we need a polling system to constantly check and instantly download when a offline product becomes online.
+* Most of the old data are offline. Old data is needed when comparing changes across time. Offline data have to first be made online before download can happen, and this can take anywhere from 20 mins to <a href="https://scihub.copernicus.eu/userguide/LongTermArchive">24 hours</a>. There is no notification system on Openhub when an offline product is made online. Hence we need a polling system to constantly check and instantly download when a offline product becomes online.
 
 * I need lots of data. Clicking them one by one to download is a pain. 
 
