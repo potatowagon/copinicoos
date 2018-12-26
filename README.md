@@ -1,7 +1,7 @@
 # Copinicoos
 Copernicus-downloader. Downloads all the results in a search query in seperate threads, and uploads to a remote git repository so Windows users may access it too. The data on local is deleted after it is uploaded to minimise disk usage. Made to run unattended on a server.
 
-![alt text](img/1.PNG "Worker class")
+![alt text](img/1.PNG "Worker class" width="400")
 
 ### Installation
 First install python. Then clone or download (.zip) this repository. Runs only on Unix systems, ie. Linux and Mac
