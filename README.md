@@ -21,7 +21,7 @@ Copernicus-downloader. Downloads all the results in a search query in seperate p
 
 * Possible to pipe data directly to processing if retrieval of data is automated.
 
-* The API documentation only supports Unix systems. No documented support for Windows. A workaround would be to automate the download to a Unix system, and transfer the files to Windows
+* The API documentation only supports Unix systems. A workaround would be to automate the download to a Unix system, and transfer the files to Windows
 
 ### How
 
