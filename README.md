@@ -1,7 +1,39 @@
 # Copinicoos
-Copernicus-downloader. Downloads all the results in a search query in seperate threads, and uploads to a remote git repository so Windows users may access it too. The data on local is deleted after it is uploaded to minimise disk usage. Made to run unattended on a server.
+Copernicus-downloader. Downloads all the results in a search query in seperate processes, and uploads to a remote repository so Windows users may access it too. The data on local is deleted after it is uploaded to minimise disk usage. Made to run unattended on a server.
+
+- [Copinicoos](#copinicoos)
+    + [Why](#why)
+    + [How](#how)
+    + [Installation](#installation)
+    + [Setup](#setup)
+      - [Set Remote repository](#set-remote-repository)
+      - [Set Copernicus Open Hub accounts](#set-copernicus-open-hub-accounts)
+    + [Run](#run)
+    + [Retrieving from remote](#retrieving-from-remote)
+      - [Github](#github)
+      - [Google drive](#google-drive)
+    + [Troubleshoot](#troubleshoot)
+    
+### Why
+* Most of the old data are offline. Old data is needed when comparing changes across time. Offline data have to first be made online before download can happen, and this can take anywhere from 20 mins to 24 hours. There is no notification system on Openhub when an offline product is made online. Hence we need a polling system to constantly check and instantly download when a offline product becomes online.
+
+* I need lots of data. Clicking them one by one to download is a pain. 
+
+* Possible to pipe data directly to processing if retrieval of data is automated.
+
+* The API documentation only supports Unix systems. No documented support for Windows. A workaround would be to automate the download to a Unix system, and transfer the files to Windows
+
+### How
 
 <img src="img/1.PNG" width="400">
+
+Each download process is managed independently by a `Worker` class. Each Worker has its on workdir where files from its query are downloaded to, and its own Copernicus account to authorize with openhub. 
+</br></br>
+Once a Worker acquires the lock it will start downloading immediately. It holds onto the lock for 5 seconds to ensure only one worker at a time initiates a request with openhub. This is to prevent interference in the initiation which can lead to garbled data. After that the download processes across workers can happen simultaneously. Once data is downloaded it is then uploaded in a seperate thread to a remote (Github or Google Drive). The main loop then process to download the next file.   
+
+<img src="img/2.png">
+
+In this code 4 Worker instances are initialised to download data from year 2014 to 2017, where each worker is in charge of downloading all data in a particular year. The number i of the i-th downloaded file is saved to progress.txt. When the run resumes or restarts it will read from progress.txt, and continue downloading from the i-th file. You may edit progress.txt to specify a start point of download.
 
 ### Installation
 First install python. Then clone or download (.zip) this repository. Runs only on Unix systems, ie. Linux and Mac
@@ -47,6 +79,16 @@ To run
 ```
 python main.py
 ```
+
+### Retrieving from remote
+
+#### Github
+```
+git pull data 
+```
+
+#### Google drive 
+Script coming soon
 
 ### Troubleshoot
 
