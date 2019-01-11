@@ -9,6 +9,7 @@ Copernicus-downloader. Downloads all the results in a search query in seperate p
       - [Set Remote repository](#set-remote-repository)
       - [Set Copernicus Open Hub accounts](#set-copernicus-open-hub-accounts)
     + [Run](#run)
+      - [Resuming a run](#Resuming-a-run)
     + [Retrieving from remote](#retrieving-from-remote)
       - [Github](#github)
       - [Google drive](#google-drive)
