@@ -80,6 +80,15 @@ To run
 python main.py
 ```
 
+#### Resuming a run
+In each Worker's workdir there is a progress.txt that logs the most recent file index downloaded (eg. 1 for the first file in the queried results, 2 for the second, and so on). 
+
+* By default it will resume from the number in progress.txt. 
+
+* To restart and download from the first product, delete the workdir. 
+
+* You may edit progress.txt to specify a start point of download.
+
 ### Retrieving from remote
 
 #### Github
