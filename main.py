@@ -130,8 +130,8 @@ class Worker():
             cmd = "git commit -m'add file'" 
             subprocess.call(cmd, stdout=self.worker_log, stderr=self.worker_log, shell=True)
 
-            thread_upload = Thread(target=self._run_upload, args=(new_file, self.upload_log))
-            thread_upload.start()
+            #thread_upload = Thread(target=self._run_upload, args=(new_file, self.upload_log))
+            #thread_upload.start()
 
     def _run_upload(self, new_file, log):
         cmd = "git push data master" 
