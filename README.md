@@ -1,5 +1,5 @@
 # Copinicoos
-Copernicus-downloader. Downloads all the results in a search query in seperate processes, and uploads to a remote repository so Windows users may access it too. The data on local is deleted after it is uploaded to minimise disk usage. Made to run unattended on a server.
+<a href="https://scihub.copernicus.eu/dhus/#/home">Copernicus</a>-downloader. Downloads all the results in a search query in seperate processes, and uploads to a remote repository so Windows users may access it too. The data on local is deleted after it is uploaded to minimise disk usage. Made to run unattended on a server.
 
 - [Copinicoos](#copinicoos)
     + [Why](#why)
