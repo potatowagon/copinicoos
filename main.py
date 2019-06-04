@@ -4,9 +4,14 @@ import subprocess
 from threading import Thread
 from multiprocessing import Process
 from multiprocessing import Lock
-import secrets
+#import secrets
 import re
 import time
+import json
+import colorama
+from colorama import Fore
+
+colorama.init(convert=True, autoreset=True)
 
 class Worker():
     request_lock = Lock()
@@ -27,6 +32,7 @@ class Worker():
         self.progress_log = None
         self.worker_log = None
         self.upload_log = None
+        self.is_busy = False
 
     def set_name(self, name):
         self.name = name
@@ -83,17 +89,24 @@ class Worker():
             self.resume = 1
 
     def run_query(self):
-        cmd = self.workdir + '/dhusget.sh -u ' + str(self.username) + ' -p ' + str(self.password) + ' -T GRD -m "Sentinel-1" -c "' + str(self.lonlat) + '" -S ' + str(self.start_date) + ' -E ' + str(self.end_date) + ' -l 1 -P 1 -L ' + self.workdir +'/dhusget_lock -q ' + self.workdir + '/OSquery-result.xml' 
-        subprocess.call(cmd, stdout=self.worker_log, stderr=self.worker_log, shell=True)
-        self.total_results = self._get_total_results()  
-        print("\ntotal results in " + self.name + ": " + self.total_results + "\n")      
+        return None
 
-    def _get_total_results(self):
-        cmd = "cat " + self.workdir + "/OSquery-result.xml | grep 'subtitle'"
-        out = subprocess.check_output(cmd, shell=True)
-        p = re.compile("of (.*) total")
-        max = p.search(out)
-        return max.group(1)
+    def query_total_results(self, query):
+        '''
+        params: a query that request a response in json
+        returns: the total number of product results from the query response
+        '''
+        json_file = "res.json"
+        try:
+            cmd = "wget --no-check-certificate --user=" + self.username + " --password=" + self.password + " -O " + json_file + " " + query
+            subprocess.call(cmd)
+            res_json = json.load(open(json_file))
+            total_results = int(res_json["feed"]["opensearch:totalResults"])
+            if total_results <= 0:
+                raise ValueError
+            return total_results
+        except Exception as e:
+            raise
 
     def start_download(self):
         self.setup()
@@ -166,7 +179,7 @@ def main():
     dir_path_2015 = "morocco/2015"
     dir_path_2016 = "morocco/2016"
     dir_path_2017 = "morocco/2017"
-
+    '''
     worker2014 = Worker(secrets.worker1_username, secrets.worker1_password, dir_path_2014)
     worker2014.set_name("2014")
     worker2014.set_query(lonlat, start_2014, end_2014)
