@@ -186,6 +186,98 @@ def main():
     worker2017.set_name("2017")
     worker2017.set_query(lonlat, start_2017, end_2017)
     worker2017.start_download()
+    '''
+class InputManager():
+    
+    def __init__(self):
+        self.worker_list = []
+        self.query = None
+        self.total_results = None
+        self.offline_retries = 10
+        self.polling_interval = 10800
+        self.download_location = os.getcwd()
+
+    @staticmethod
+    def format_query(query):
+        query = query.strip()
+
+        request_done_str = "Request Done: "
+        if query.startswith(request_done_str):
+            query = query.replace(request_done_str, "")
+        
+        if query.startswith('"') and query.endswith('"'):
+            query = query[1:len(query)-1]
+
+        if query.startswith("'") and query.endswith("'"):
+            query = query[1:len(query)-1]
+        
+        if not '\\"' in query:
+            if '"' in query:
+                query = query.replace('"', '\\"')
+
+        query = '"https://scihub.copernicus.eu/dhus/search?q=' + query + '&format=json"'
+        return query
+
+    @staticmethod
+    def is_worker_auth_valid(username, password):
+        '''
+        Send sample query to check worker auth
+        returns: True if valid
+        '''
+        print("Authenticationg worker...")
+        json_file = "res.json"
+        sample_query = "https://scihub.copernicus.eu/dhus/search?q=*&rows=1&format=json"
+        try:
+            cmd = "wget --no-check-certificate --user=" + username + " --password=" + password + " -O " + json_file + " " + sample_query
+            subprocess.call(cmd)
+            res_json = json.load(open(json_file))
+            if res_json["feed"] is not None:
+                return True
+        except:
+            return False
+
+    def is_unique_worker_cred(self, username, password):
+        '''
+        Check if username and password have already been used to initialise a worker
+        returns: True if unused 
+        '''
+        for worker in self.worker_list:
+            if username == worker.username:
+                return False
+        return True
+
+    def interactive_input(self):
+        print(Fore.YELLOW + "Enter number of workers: ")
+        total_workers = int(input())
+        i = 1
+        while i <= total_workers:
+            print(Fore.YELLOW + "Enter username of worker " + str(i))
+            username = input()
+            print(Fore.YELLOW + "Enter password of worker " + str(i))
+            password = input()
+            if not InputManager().is_worker_auth_valid(username, password):
+                print(Fore.RED + "Authentication failed, please try again.")
+            else:
+                if self.is_unique_worker_cred(username, password):
+                    self.worker_list.append(Worker(username, password, self.download_location))
+                    print(Fore.GREEN + "Worker sucessfully authenticated.")
+                    i += 1
+                else:
+                    print(Fore.RED + "Credentials already used. Please try again.")
+        
+        print(Fore.YELLOW + "Enter query: ")
+        while self.total_results is None:
+            query = input()
+            query = InputManager.format_query(query)
+            print("\nSending query: " + query + "\n")
+            try:
+                self.total_results = self.worker_list[0].query_total_results(query)
+            except:
+                print(Fore.RED + "Query failed. Please check query and try again")
+        print(Fore.GREEN + str(self.total_results) + " products found.")
 
 if __name__ == "__main__":
+    input_manager = InputManager()
+    if len(sys.argv) == 1:
+        input_manager.interactive_input()
     main()
