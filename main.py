@@ -260,6 +260,13 @@ class InputManager():
         return True
 
     def interactive_input(self):
+        self._get_worker_input_i()
+        self._get_query_input_i()
+        self._get_download_location_input_i()
+        self._get_polling_interval_input_i()
+        self._get_offline_retries_input_i()
+    
+    def _get_worker_input_i(self):
         print(Fore.YELLOW + "Enter number of workers: ")
         total_workers = int(input())
         i = 1
@@ -277,7 +284,8 @@ class InputManager():
                     i += 1
                 else:
                     print(Fore.RED + "Credentials already used. Please try again.")
-        
+                
+    def _get_query_input_i(self):
         print(Fore.YELLOW + "Enter query: ")
         while self.total_results is None:
             query = input()
@@ -288,6 +296,36 @@ class InputManager():
             except:
                 print(Fore.RED + "Query failed. Please check query and try again")
         print(Fore.GREEN + str(self.total_results) + " products found.")
+        self.query = query
+
+    def _get_download_location_input_i(self):
+        print(Fore.YELLOW + "Default download directory set to " + self.download_location + "\nEnter new path to change, if not will use default.")
+        download_location = str(input())
+        if os.path.exists(download_location):
+            self.download_location = download_location
+            print("Download path set to " + download_location)
+        else: 
+            print("Using default path.")
+
+    def _get_polling_interval_input_i(self):
+        print(Fore.YELLOW + "Default polling interval for offline products set to " + str(self.polling_interval) + " seconds.\nEnter new polling interval, if not will use default.")
+        try:
+            polling_interval = int(input())
+            self.polling_interval = polling_interval
+            print("Polling interval set to " + str(self.polling_interval) + " seconds.")
+        except Exception as e:
+            print(e)
+            print("Using default polling interval.")
+
+    def _get_offline_retries_input_i(self):
+        print(Fore.YELLOW + "Default offline retries in set to " + str(self.offline_retries) + "\nEnter new offline retries, if not will use default.")
+        try:
+            offline_retries = int(input())
+            self.offline_retries = offline_retries
+            print("Offline retries set to " + str(self.offline_retries))
+        except Exception as e:
+            print(e)
+            print("Using default offline retries.")
 
 if __name__ == "__main__":
     input_manager = InputManager()
