@@ -75,10 +75,9 @@ class Worker():
         subprocess.call(cmd, shell=True)
 
         # create log files
-        self.progress_log = open(self.workdir + '/progress.txt', 'a+')
-        self.worker_log = open(self.workdir + '/worker_log.txt', 'w+')
-        self.upload_log = open(self.workdir + '/upload_log.txt', 'w+')
-
+        self.progress_log = open(os.path.join(self.workdir, self.name + '_progress.txt'), 'a+')
+        self.worker_log = open(os.path.join(self.workdir + '/worker_log.txt', 'w+'))
+        
         # commit logs
         cmd = "git add --all" 
         subprocess.call(cmd, shell=True)
@@ -201,14 +200,12 @@ def main():
     worker2017.start_download()
     '''
 class InputManager():
-    
     def __init__(self):
+        self.args = Args()
         self.worker_list = []
-        self.query = None
-        self.total_results = None
-        self.offline_retries = 10
-        self.polling_interval = 10800
-        self.download_location = os.getcwd()
+        self.args.download_location = os.getcwd()
+        self.args.polling_interval = 10800
+        self.args.offline_retries = 10
 
     @staticmethod
     def format_query(query):
@@ -279,7 +276,7 @@ class InputManager():
                 print(Fore.RED + "Authentication failed, please try again.")
             else:
                 if self.is_unique_worker_cred(username, password):
-                    self.worker_list.append(Worker(username, password, self.download_location))
+                    self.worker_list.append(Worker(username, password))
                     print(Fore.GREEN + "Worker sucessfully authenticated.")
                     i += 1
                 else:
@@ -287,48 +284,117 @@ class InputManager():
                 
     def _get_query_input_i(self):
         print(Fore.YELLOW + "Enter query: ")
-        while self.total_results is None:
+        while self.args.total_results is None:
             query = input()
             query = InputManager.format_query(query)
             print("\nSending query: " + query + "\n")
             try:
-                self.total_results = self.worker_list[0].query_total_results(query)
+                self.args.total_results = self.return_worker_list()[0].query_total_results(query)
             except:
                 print(Fore.RED + "Query failed. Please check query and try again")
-        print(Fore.GREEN + str(self.total_results) + " products found.")
-        self.query = query
+        print(Fore.GREEN + str(self.args.total_results) + " products found.")
+        self.args.query = query
 
     def _get_download_location_input_i(self):
-        print(Fore.YELLOW + "Default download directory set to " + self.download_location + "\nEnter new path to change, if not will use default.")
+        print(Fore.YELLOW + "Default download directory set to " + self.args.download_location + "\nEnter new path to change, if not will use default.")
         download_location = str(input())
         if os.path.exists(download_location):
-            self.download_location = download_location
+            self.args.download_location = download_location
             print("Download path set to " + download_location)
         else: 
             print("Using default path.")
 
     def _get_polling_interval_input_i(self):
-        print(Fore.YELLOW + "Default polling interval for offline products set to " + str(self.polling_interval) + " seconds.\nEnter new polling interval, if not will use default.")
+        print(Fore.YELLOW + "Default polling interval for offline products set to " + str(self.args.polling_interval) + " seconds.\nEnter new polling interval, if not will use default.")
         try:
             polling_interval = int(input())
-            self.polling_interval = polling_interval
-            print("Polling interval set to " + str(self.polling_interval) + " seconds.")
+            self.args.polling_interval = polling_interval
+            print("Polling interval set to " + str(self.args.polling_interval) + " seconds.")
         except Exception as e:
             print(e)
             print("Using default polling interval.")
 
     def _get_offline_retries_input_i(self):
-        print(Fore.YELLOW + "Default offline retries in set to " + str(self.offline_retries) + "\nEnter new offline retries, if not will use default.")
+        print(Fore.YELLOW + "Default offline retries is set to " + str(self.args.offline_retries) + "\nEnter new offline retries, if not will use default.")
         try:
             offline_retries = int(input())
-            self.offline_retries = offline_retries
-            print("Offline retries set to " + str(self.offline_retries))
+            self.args.offline_retries = offline_retries
+            print("Offline retries set to " + str(self.args.offline_retries))
         except Exception as e:
             print(e)
             print("Using default offline retries.")
+
+    def return_worker_list(self):
+        '''
+        Checks that there is at list one worker initialised before returning worker_list
+        returns: worker_list if check passed
+        '''
+        try:
+            int(len(self.worker_list))
+            return self.worker_list
+        except Exception as e:
+            print(e)
+            print(Fore.RED + "Error in returning workers. No workers initialised.")
+    
+    def return_args(self):
+        '''
+        Checks that all required args have been initialised
+        return: Args if check passed
+        '''
+        try:
+            for arg in Args().__dict__:
+                if self.args.__dict__[arg] is None:
+                    raise Exception(arg + " is not defined.")
+            return self.args
+        except Exception as e:
+            print(e)
+            print(Fore.RED + "Error in input. One or more required argument is not defined.")
+
+    def cmd_input(self):
+        '''
+        TODO
+        '''
+        pass
+
+class Args():
+    '''
+    Required args interface
+    '''
+    def __init__(self):
+        self.query = None
+        self.total_results = None
+        self.download_location = None
+        self.offline_retries = None
+        self.polling_interval = None
+        
+class WorkerManager():
+    def __init__(self, worker_list, query, total_result, download_location, polling_interval, offline_retries):
+        self.worker_list = worker_list
+        self.query = query
+        self.total_results = total_result
+        self.offline_retries = offline_retries
+        self.polling_interval = polling_interval
+        self.download_location = download_location
+        self.workdir = None
+
+    @classmethod
+    def init_from_args(self, worker_list, args):
+        return self(worker_list, args.query, args.total_results, args.download_location, args.polling_interval, args.offline_retries)
+
+    def setup_workdir(self):
+        self.workdir = os.path.join(self.download_location, "copinicoos_logs")
+        # create workdir
+        cmd = "mkdir -p " + self.workdir
+        subprocess.call(cmd, shell=True)
+
+        #create log.txt
 
 if __name__ == "__main__":
     input_manager = InputManager()
     if len(sys.argv) == 1:
         input_manager.interactive_input()
-    main()
+    else:
+        input_manager.cmd_input()
+    
+    worker_manager = WorkerManager.init_from_args(input_manager.return_worker_list(), input_manager.return_args())
+    
