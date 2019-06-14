@@ -4,91 +4,75 @@ import subprocess
 from threading import Thread
 from multiprocessing import Process
 from multiprocessing import Lock
-#import secrets
 import re
 import time
 import json
 import colorama
 from colorama import Fore
+import asyncio
+
 
 colorama.init(convert=True, autoreset=True)
 
-class Worker():
-    request_lock = Lock()
+class Resumable():
+    def __init__(self):
+        self.progress_log_path = None
+        
+    def setup(self, progress_log_path):
+        self.progress_log_path = progress_log_path
+        # create file if it does not exist
+        progress_log = open(self.progress_log_path, 'a+')
+        progress_log.close()
 
-    def __init__(self, username, password, workdir):
-        self.username = username
-        self.password = password
-        self.workdir = workdir
-        self.resume = None
-        self.total_results = None
-        self.name = username
-        self.process = None
-
-        self.lonlat = None
-        self.start_date = None
-        self.end_date = None
-
-        self.progress_log = None
-        self.worker_log = None
-        self.upload_log = None
-        self.is_busy = False
-
-    def set_name(self, name):
-        self.name = name
-
-    def set_query(self, lonlat, start_date, end_date):
-        self.lonlat = lonlat
-        self.start_date = start_date
-        self.end_date = end_date
-
-    def set_lonlat(self, lonlat):
-        self.lonlat = lonlat
-
-    def set_start_date(self, start_date):
-        self.start_date = start_date
-
-    def set_end_date(self, end_date):
-        self.end_date = end_date
-
-    def _read_file(self, file_r):
+    def read_file(self, file_path):
+        file_r = open(file_path)
         file_r.seek(0)
         out = file_r.read()
         file_r.close()
         return out
 
-    def _overwrite_file(self, file_path, msg):
+    def overwrite_file(self, file_path, msg):
         file_o = open(file_path, 'w+')
         file_o.write(msg)
         file_o.seek(0)
         file_o.close()
 
-    def setup(self):
-        # create workdir
-        cmd = "mkdir -p " + self.workdir
-        subprocess.call(cmd, shell=True)
+    def load_resume_point(self):
+        try:
+            resume = self.read_file(self.progress_log_path)
+            if resume == '':
+                resume = None
+            return resume
+        except:
+            raise
 
-        #copy download script to work dir
-        cmd = "cp ./dhusget.sh " + self.workdir
-        subprocess.call(cmd, shell=True)
-        cmd = "chmod +x " + self.workdir + "/dhusget.sh"
-        subprocess.call(cmd, shell=True)
+    def update_resume_point(self, result_num):
+        self.overwrite_file(self.progress_log_path, str(result_num))
 
-        # create log files
-        self.progress_log = open(os.path.join(self.workdir, self.name + '_progress.txt'), 'a+')
-        self.worker_log = open(os.path.join(self.workdir + '/worker_log.txt', 'w+'))
-        
-        # commit logs
-        cmd = "git add --all" 
-        subprocess.call(cmd, shell=True)
+class Worker(Resumable):
+    request_lock = Lock()
 
-        # load resume point
-        self.resume = self._read_file(self.progress_log)
-        if self.resume == '':
-            self.resume = 1
+    def __init__(self, username, password):
+        Resumable.__init__(self)
+        self.username = username
+        self.password = password
+        self.name = username
+        self.workdir = None
+        self.query = None
+        self.download_location = None
+        self.polling_interval = None
+        self.offline_retries = None
+        self.worker_log = None
+    
+    def set_name(self, name):
+        self.name = name
 
-    def run_query(self):
-        return None
+    def setup(self, workdir):
+        self.workdir = workdir
+        # create log files if not exist
+        self.worker_log = open(os.path.join(self.workdir, self.name + '_log.txt'), 'w+')
+        progress_log_path = os.path.join(self.workdir, self.name + '_progress.txt')
+        super().setup(progress_log_path)
 
     def query_total_results(self, query):
         '''
@@ -103,24 +87,66 @@ class Worker():
             total_results = int(res_json["feed"]["opensearch:totalResults"])
             if total_results <= 0:
                 raise ValueError
+            os.remove(json_file)
             return total_results
         except Exception as e:
             raise
 
-    def start_download(self):
-        self.setup()
-        self.run_query()
-        self.process = Process(target=self._run_worker)
+    def query_product_uri(self, result_num):
+        return None
+
+    def download_product(self, product_uri):
+        self.process = Process(target=None)
         self.process.start()
 
+    def download(self, result_num):
+        '''
+        self.update_resume_point(result_num)
+        self._prepare_to_request()
+        product_uri = self.query_product_uri(result_num)
+        self._prepare_to_request()
+        download_status = self.download(product_uri)
+        i = 0
+        while download_status != "success" and i < self.offline_retries:
+            #sleep
+            #download
+            pass
+        #update worker log
+        ready_worker_queue.put_nowait(self)
+        return download_status
+        '''
+        pass
+
     def _hold_lock(self):
-        print(self.name + " has the lock. Begin downloading...")
+        print(self.name + " has the lock. Ready to send requests...")
         time.sleep(5)
         self.request_lock.release()
 
-    def _run_worker(self):
+    def _prepare_to_request(self):
+        ''' prepare to send a request by acquiring lock. 
+        Has 5 seconds to be the only one making a request while holding lock
+        '''
+        self.request_lock.acquire()
+        hold_lock_thread = Thread(target=self._hold_lock)
+        hold_lock_thread.start()
+
+    def register_settings(self, query, download_location, polling_interval, offline_retries):
+        self.query = query
+        self.download_location = download_location
+        self.polling_interval = polling_interval
+        self.offline_retries = offline_retries
+
+    def run_in_seperate_process(self, result_num, ready_worker_queue):
+        self.update_resume_point(result_num)
+        print("running worker", self.name)
+        time.sleep(5)
+        ready_worker_queue.put_nowait(self)
+        return "success"
+        
+
+    def run_worker(self):
         for page in range(int(self.resume), int(self.total_results) + 1):
-            self._overwrite_file(self.workdir + '/progress.txt', str(page))
+            self.overwrite_file(self.workdir + '/progress.txt', str(page))
 
             self.request_lock.acquire()
             hold_lock_thread = Thread(target=self._hold_lock)
@@ -130,49 +156,8 @@ class Worker():
             print(cmd)
             subprocess.call(cmd, stdout=self.worker_log, stderr=self.worker_log, shell=True)
 
-            new_file = self._untracked_file_name()
-            print(new_file)
-
-            cmd = "git status -s | grep '?? " + self.workdir + "' | awk '{ print $2 }' | xargs git add" 
-            subprocess.call(cmd, stdout=self.worker_log, stderr=self.worker_log, shell=True)
-
-            cmd = "git add " + self.workdir + "/progress.txt" 
-            subprocess.call(cmd, stdout=self.worker_log, stderr=self.worker_log, shell=True)
-
-            cmd = "git commit -m'add file'" 
-            subprocess.call(cmd, stdout=self.worker_log, stderr=self.worker_log, shell=True)
-
-            #thread_upload = Thread(target=self._run_upload, args=(new_file, self.upload_log))
-            #thread_upload.start()
-
-    def _run_upload(self, new_file, log):
-        cmd = "git push data master" 
-        subprocess.call(cmd, stdout=log, stderr=log, shell=True)
-
-        cmd = "rm " + new_file
-        subprocess.call(cmd, stdout=log, stderr=log, shell=True)
-
-    def _untracked_file_name(self):
-        cmd = "git status -s | grep '?? " + self.workdir + "' | awk '{ print $2 }'"
-        return subprocess.check_output(cmd, shell=True)
-
 def main():
     
-    lonlat = "91.02953481336696,22.018870264782876:91.10092418414045,22.096923117944428" #domar char, bangladesh
-    
-    #YYYY-MM-DDThh:mm:ss.cccZ
-    start_2014 = "2014-01-01T00:00:00.000Z"
-    end_2014 = "2014-12-31T23:59:59.000Z"
-
-    start_2015 = "2015-01-01T00:00:00.000Z"
-    end_2015 = "2015-12-31T23:59:59.000Z"
-
-    start_2016 = "2016-01-01T00:00:00.000Z"
-    end_2016 = "2016-12-31T23:59:59.000Z"
-
-    start_2017 = "2017-01-01T00:00:00.000Z"
-    end_2017 = "2017-12-31T23:59:59.000Z"
-
     # ommit './'
     dir_path_2014 = "morocco/2014"
     dir_path_2015 = "morocco/2015"
@@ -367,8 +352,9 @@ class Args():
         self.offline_retries = None
         self.polling_interval = None
         
-class WorkerManager():
+class WorkerManager(Resumable):
     def __init__(self, worker_list, query, total_result, download_location, polling_interval, offline_retries):
+        Resumable.__init__(self)
         self.worker_list = worker_list
         self.query = query
         self.total_results = total_result
@@ -383,11 +369,41 @@ class WorkerManager():
 
     def setup_workdir(self):
         self.workdir = os.path.join(self.download_location, "copinicoos_logs")
-        # create workdir
-        cmd = "mkdir -p " + self.workdir
-        subprocess.call(cmd, shell=True)
+        if not os.path.exists(self.workdir):
+            os.mkdir(self.workdir)
 
-        #create log.txt
+        #create log.txt if not exist
+        progress_log_path = os.path.join(self.workdir, 'WorkerManager_progress.txt')
+        super().setup(progress_log_path)
+
+        for worker in self.worker_list:
+            worker.setup(self.workdir)
+
+    async def run_workers(self):
+        ready_worker_queue = asyncio.Queue(maxsize=len(self.worker_list))
+        resume_point = self.load_resume_point()
+        if resume_point == None:
+            resume_point = 0
+        else:
+            resume_point = int(resume_point)
+        
+        for worker in self.worker_list:
+            worker.register_settings(self.query, self.download_location, self.polling_interval, self.offline_retries)
+            try:
+                worker_resume_point = worker.load_resume_point()
+                if worker_resume_point == None:
+                    ready_worker_queue.put_nowait(worker)
+                else:
+                    worker.run_in_seperate_process(worker_resume_point, ready_worker_queue)
+            except Exception as e:
+                print(e)
+                print(Fore.RED + "Error in queueing workers")
+        
+        for i in range (resume_point, int(self.total_results)):
+            worker = await ready_worker_queue.get()
+            worker.run_in_seperate_process(i, ready_worker_queue)
+            resume_point += 1
+            self.update_resume_point(resume_point)
 
 if __name__ == "__main__":
     input_manager = InputManager()
@@ -397,4 +413,5 @@ if __name__ == "__main__":
         input_manager.cmd_input()
     
     worker_manager = WorkerManager.init_from_args(input_manager.return_worker_list(), input_manager.return_args())
-    
+    worker_manager.setup_workdir()
+    asyncio.run(worker_manager.run_workers())
