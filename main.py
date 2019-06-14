@@ -93,7 +93,22 @@ class Worker(Resumable):
             raise
 
     def query_product_uri(self, result_num):
-        return None
+        '''
+        params: result number
+        returns: title and product_uri, eg. "S1A_IW_GRDH_1SDV_20181011T115601_20181011T115626_024088_02A208_C886", "https://scihub.copernicus.eu/dhus/odata/v1/Products('7bc7da0c-8241-4bbe-8d59-1661667c6161')/$value"
+        '''
+        query = self.query + str(result_num) + '"'
+        print(query)
+        json_file = self.name + "_res.json"
+        try:
+            cmd = "wget --no-check-certificate --user=" + self.username + " --password=" + self.password + " -O " + json_file + " " + query
+            subprocess.call(cmd)
+            res_json = json.load(open(json_file))
+            title = str(res_json["feed"]["entry"][0]["title"])
+            product_uri = str(res_json["feed"]["entry"][0]["link"][0]["href"])
+            return title, product_uri
+        except Exception as e:
+            raise
 
     def download_product(self, product_uri):
         self.process = Process(target=None)
@@ -136,14 +151,18 @@ class Worker(Resumable):
         self.polling_interval = polling_interval
         self.offline_retries = offline_retries
 
+    def run(self, result_num):
+        title, product_uri = self.query_product_uri(result_num)
+        print(Fore.GREEN + "Begin downloading\n" + title + "\nat\n" + product_uri + "\n")
+
     def run_in_seperate_process(self, result_num, ready_worker_queue):
         self.update_resume_point(result_num)
         print("running worker", self.name)
+        self.run(result_num)
         time.sleep(5)
         ready_worker_queue.put_nowait(self)
         return "success"
         
-
     def run_worker(self):
         for page in range(int(self.resume), int(self.total_results) + 1):
             self.overwrite_file(self.workdir + '/progress.txt', str(page))
@@ -379,6 +398,12 @@ class WorkerManager(Resumable):
         for worker in self.worker_list:
             worker.setup(self.workdir)
 
+    def adjust_query_for_specific_product(self):
+        if not "&rows=1" in self.query:
+            self.query = self.query[:(len(self.query)-1)] + "&rows=1" 
+        if not "&start=" in self.query:
+            self.query = self.query[:(len(self.query)-1)] + "&start=" 
+
     async def run_workers(self):
         ready_worker_queue = asyncio.Queue(maxsize=len(self.worker_list))
         resume_point = self.load_resume_point()
@@ -413,5 +438,6 @@ if __name__ == "__main__":
         input_manager.cmd_input()
     
     worker_manager = WorkerManager.init_from_args(input_manager.return_worker_list(), input_manager.return_args())
+    worker_manager.adjust_query_for_specific_product()
     worker_manager.setup_workdir()
     asyncio.run(worker_manager.run_workers())
