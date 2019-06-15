@@ -110,6 +110,21 @@ class Worker(Resumable):
         except Exception as e:
             raise
 
+    def query_product_uri_with_retries(self, result_number, max_retries=3):
+        title = None
+        product_uri = None
+        uri_query_retries = 0
+        uri_query_max_retries = max_retries
+        while uri_query_retries <= uri_query_max_retries and (title is None or product_uri is None):
+            try:
+                title, product_uri = self.query_product_uri(result_number)
+            except Exception as e:
+                print(e)
+                print(Fore.RED + "Error in querying product uri from result number.")
+                print("Retrying " + str(uri_query_retries) + " out of " + str(uri_query_max_retries) + " times.")
+                uri_query_retries += 1
+        return title, product_uri
+
     def download_product(self, product_uri):
         self.process = Process(target=None)
         self.process.start()
@@ -151,10 +166,10 @@ class Worker(Resumable):
         self.polling_interval = polling_interval
         self.offline_retries = offline_retries
 
-    def run(self, result_num):
-        title, product_uri = self.query_product_uri(result_num)
+    def run(self, result_num, uri_query_max_retries=3):
+        title, product_uri = self.query_product_uri_with_retries(result_num)
         print(Fore.GREEN + "Begin downloading\n" + title + "\nat\n" + product_uri + "\n")
-
+        
     def run_in_seperate_process(self, result_num, ready_worker_queue):
         self.update_resume_point(result_num)
         print("running worker", self.name)
