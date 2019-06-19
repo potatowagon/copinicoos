@@ -104,12 +104,17 @@ class Worker(Resumable):
             cmd = "wget --no-check-certificate --user=" + self.username + " --password=" + self.password + " -O " + json_file + " " + query
             subprocess.call(cmd)
             res_json = json.load(open(json_file))
-            title = str(res_json["feed"]["entry"][0]["title"])
-            product_uri = str(res_json["feed"]["entry"][0]["link"][0]["href"])
+            title = str(res_json["feed"]["entry"]["title"])
+            product_uri = str(res_json["feed"]["entry"]["link"][0]["href"])
+            product_uri = self.format_product_uri(product_uri)
             return title, product_uri
         except Exception as e:
             raise
 
+    def format_product_uri(self, product_uri):
+        product_uri = '"' + product_uri + '"'
+        return product_uri
+    
     def query_product_uri_with_retries(self, result_number, max_retries=3):
         title = None
         product_uri = None
@@ -125,9 +130,28 @@ class Worker(Resumable):
                 uri_query_retries += 1
         return title, product_uri
 
-    def download_product(self, product_uri):
+    def download_product(self, file_path, product_uri):
+        try:
+            cmd = "wget -O " + file_path + " --continue --user=" + self.username + " --password="+ self.password + " " + product_uri
+            print(Fore.YELLOW + cmd)
+            subprocess.call(cmd)
+        except Exception as e:
+            raise
+        '''
         self.process = Process(target=None)
         self.process.start()
+        '''
+
+    def download_began(self, file_path):
+        try:
+            b = os.path.getsize(file_path)
+        except Exception as e:
+            print(e)
+            return False
+        if b > 0:
+            return True
+        else:
+            return False
 
     def download(self, result_num):
         '''
@@ -169,6 +193,18 @@ class Worker(Resumable):
     def run(self, result_num, uri_query_max_retries=3):
         title, product_uri = self.query_product_uri_with_retries(result_num)
         print(Fore.GREEN + "Begin downloading\n" + title + "\nat\n" + product_uri + "\n")
+        file_path = os.path.join(self.download_location, title + ".zip")
+        self.download_product(file_path, product_uri)
+        if not self.download_began(file_path):
+            print(Fore.YELLOW + "Product could be offline. Retrying after " + str(self.polling_interval) + " seconds.")
+            for i in range(1, self.offline_retries + 1):
+                time.sleep(self.polling_interval)
+                self.download_product(file_path, product_uri)
+                if self.download_began(file_path):
+                    break
+            if i == self.offline_retries:
+                print(Fore.RED + "Failed to download " + title + ". Moving on to next product.")
+
         
     def run_in_seperate_process(self, result_num, ready_worker_queue):
         self.update_resume_point(result_num)
@@ -223,8 +259,8 @@ class InputManager():
         self.args = Args()
         self.worker_list = []
         self.args.download_location = os.getcwd()
-        self.args.polling_interval = 10800
-        self.args.offline_retries = 10
+        self.args.polling_interval = 6
+        self.args.offline_retries = 2
 
     @staticmethod
     def format_query(query):
@@ -417,7 +453,7 @@ class WorkerManager(Resumable):
         if not "&rows=1" in self.query:
             self.query = self.query[:(len(self.query)-1)] + "&rows=1" 
         if not "&start=" in self.query:
-            self.query = self.query[:(len(self.query)-1)] + "&start=" 
+            self.query = self.query[:len(self.query)] + "&start=" 
 
     async def run_workers(self):
         ready_worker_queue = asyncio.Queue(maxsize=len(self.worker_list))
