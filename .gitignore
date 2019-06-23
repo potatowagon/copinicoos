@@ -1,2 +1,6 @@
-secrets.py
-secrets.pyc
+# secrets
+tests/secrets.py
+tests/secrets.pyc
+
+# VScode
+.vscode/
