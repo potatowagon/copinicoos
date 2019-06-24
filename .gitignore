@@ -1,6 +1,6 @@
 # secrets
-tests/secrets.py
-tests/secrets.pyc
+tests/secrets*.*
+tests/secrets*.*
 
 # VScode
 .vscode/
