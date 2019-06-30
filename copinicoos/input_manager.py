@@ -1,6 +1,7 @@
 import os
 import subprocess
 import json
+import argparse
 
 from colorama import Fore
 
@@ -80,28 +81,16 @@ class InputManager():
             username = input()
             print(Fore.YELLOW + "Enter password of worker " + str(i))
             password = input()
-            if not InputManager().is_worker_auth_valid(username, password):
-                print(Fore.RED + "Authentication failed, please try again.")
-            else:
-                if self.is_unique_worker_cred(username, password):
-                    self.worker_list.append(Worker(username, password))
-                    print(Fore.GREEN + "Worker sucessfully authenticated.")
-                    i += 1
-                else:
-                    print(Fore.RED + "Credentials already used. Please try again.")
+            if self.add_worker(username, password):
+                i += 1
                 
     def _get_query_input_i(self):
         print(Fore.YELLOW + "Enter query: ")
         while self.args.total_results is None:
             query = input()
-            query = InputManager.format_query(query)
-            print("\nSending query: " + query + "\n")
-            try:
-                self.args.total_results = self.return_worker_list()[0].query_total_results(query)
-            except:
-                print(Fore.RED + "Query failed. Please check query and try again")
+            self.args.total_results = self.get_total_results_from_query(query)
         print(Fore.GREEN + str(self.args.total_results) + " products found.")
-        self.args.query = query
+        self.args.query = InputManager.format_query(query)
 
     def _get_download_location_input_i(self):
         print(Fore.YELLOW + "Default download directory set to " + self.args.download_location + "\nEnter new path to change, if not will use default.")
@@ -158,11 +147,71 @@ class InputManager():
             print(e)
             print(Fore.RED + "Error in input. One or more required argument is not defined.")
 
-    def cmd_input(self):
+    def cmd_input(self, test_args=None):
+        parser = argparse.ArgumentParser(fromfile_prefix_chars='@', description="Copernicus Downloader Bot. Use @ to load input from file.\neg. py -m copinicoos '( (platformname:Sentinel-1 AND filename:S1A_*))' {'u1':'username1','p1':'password1','u2':'username2','p2':'password2'}")
+        parser.add_argument('query', type=str, help="The query in OpenSearch API format. To generate a query, in Copenicus Open Hub apply search filters and search. The query will appear below the search bae as Request Done: (...)")
+        parser.add_argument('credentials', type=str, help="Input path to @example.json file with credentials, or input credentials in json format.\nThe username is abbr. with uN, password with pN, where N is the account number, starting from one. for eg.\n{'u1':'username1','p1':'password1','u2':'username2','p2':'password2'}\nAttempts a login with 2 accounts")
+        parser.add_argument('-d', '--download-location', help="Path to download folder", default=self.args.download_location)
+        parser.add_argument('-r', '--offline-retries', help="Number of get retries for offline product", default=self.args.offline_retries)
+        parser.add_argument('-p', '--polling-interval', help="Duration between each offline retry, in seconds", default=self.args.polling_interval)
+        if test_args == None:
+            args = parser.parse_args()
+        else:
+            args = parser.parse_args(test_args)
+        if args != None:
+            json_creds = self.get_json_creds(args.credentials)
+            self.add_workers_from_json_creds(json_creds)
+            self.get_total_results_from_query(args.query)
+            self.args.query = InputManager.format_query(args.query)
+            self.args.download_location = args.download_location
+            self.args.offline_retries = args.offline_retries
+            self.args.polling_interval = args.polling_interval
+        
+    def get_json_creds(self, arg):
+        if arg.endswith(".json"):
+            return json.load(open(arg))
+        arg = arg.strip()
+        arg = arg.replace('\n', '')
+        arg = arg.replace(' ', '')
+        return json.loads(arg)
+
+    def add_workers_from_json_creds(self, json_creds):
+        for k in json_creds:
+            if k.startswith("u"):
+                username = json_creds[k]
+                try:
+                    password = json_creds["p" + k[1:]]
+                except Exception as e:
+                    print(e)
+                    print(Fore.RED + "Password not set for " + username)
+                if not self.add_worker(username, password):
+                    raise Exception("Failed to add worker for username: " + username)
+
+    def add_worker(self, username, password):
+        ''' Creates and adds a Worker to worker list.
+        returns True if successful, else returns False
         '''
-        TODO
-        '''
-        pass
+        if not InputManager().is_worker_auth_valid(username, password):
+            print(Fore.RED + "Authentication failed, please try again.")
+            return False
+    
+        if self.is_unique_worker_cred(username, password):
+            self.worker_list.append(Worker(username, password))
+            print(Fore.GREEN + "Worker sucessfully authenticated.")
+            return True
+        else:
+            print(Fore.RED + "Credentials already used. Please try again.")
+            return False
+
+    def get_total_results_from_query(self, query):
+        query = InputManager.format_query(query)
+        print("\nSending query: " + query + "\n")
+        try:
+            self.args.total_results = self.return_worker_list()[0].query_total_results(query)
+        except Exception as e:
+            print(e)
+            print(Fore.RED + "Query failed. Please check query and try again")
+        return self.args.total_results
 
 class Args():
     '''
