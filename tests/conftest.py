@@ -10,6 +10,9 @@ import pytest
 from copinicoos import InputManager
 from copinicoos.input_manager import Args 
 from copinicoos import WorkerManager
+from copinicoos.worker import Worker
+
+test_dir = os.path.dirname(os.path.realpath(__file__))
 
 @pytest.fixture(scope="session")
 def creds():
@@ -19,6 +22,13 @@ def creds():
 def worker_list_1_worker(creds):
     im = InputManager()
     im.add_worker(creds["u1"], creds["p1"])
+    return im.worker_list
+
+@pytest.fixture(scope="session")
+def worker_list_2_workers(creds):
+    im = InputManager()
+    im.add_worker(creds["u1"], creds["p1"])
+    im.add_worker(creds["u2"], creds["p2"])
     return im.worker_list
 
 @pytest.fixture()
@@ -52,11 +62,16 @@ def worker_manager(worker_list_1_worker, args):
 @pytest.fixture()
 def cleanup():
     yield
-    test_dir = os.path.dirname(os.path.realpath(__file__))
     for item in os.listdir(test_dir):
         if item.startswith("S") and item.endswith(".zip"):
             os.remove(os.path.join(test_dir, item))
         if item == "copinicoos_logs":
             shutil.rmtree(item)
 
+@pytest.fixture()
+def worker(creds, args):
+    w = Worker(creds["u2"], creds["p2"])
+    w.register_settings(args.query, args.download_location, args.polling_interval, args.offline_retries)
+    w.setup(test_dir)
+    return w
             
