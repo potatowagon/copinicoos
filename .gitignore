@@ -1,6 +1,6 @@
 # secrets
-tests/secrets*.*
-tests/secrets*.*
+tests/**/secrets*.*
+tests/**/secrets*.*
 
 # VScode
 .vscode/
