@@ -4,10 +4,6 @@ import pytest
 
 from copinicoos import InputManager
 
-@pytest.fixture(scope="session")
-def creds():
-    return json.load(open("secrets2.json"))
-
 def test_add_worker_success(creds):
     im = InputManager()
     assert im.add_worker(creds["u1"], creds["p1"]) == True
@@ -30,22 +26,6 @@ def test_multi_add_worker_repeat_creds(creds):
     assert im.add_worker(creds["u1"], creds["p1"]) == True
     assert im.add_worker(creds["u1"], creds["p1"]) == False
     assert len(im.worker_list) == 1
-
-@pytest.fixture(scope="session")
-def worker_list_1_worker(creds):
-    im = InputManager()
-    im.add_worker(creds["u1"], creds["p1"])
-    return im.worker_list
-
-@pytest.fixture()
-def input_manager_with_one_worker(worker_list_1_worker):
-    im = InputManager()
-    im.worker_list = worker_list_1_worker
-    return im
-
-@pytest.fixture(scope="session")
-def query():
-    return open("query.txt").read()
 
 def test_get_total_results_from_query_success(query, input_manager_with_one_worker):
     im = input_manager_with_one_worker
@@ -93,3 +73,7 @@ def test_add_workers_from_json_creds(json, expected_workers):
     assert len(im.worker_list) == expected_workers
     for worker in im.worker_list:
         assert type(worker).__name__ == "Worker"
+
+def test_format_query(query, formatted_query):
+    fq = InputManager.format_query(query)
+    assert fq == formatted_query

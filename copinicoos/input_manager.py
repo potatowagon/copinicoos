@@ -50,6 +50,7 @@ class InputManager():
             subprocess.call(cmd)
             res_json = json.load(open(json_file))
             if res_json["feed"] is not None:
+                os.remove(json_file)
                 return True
         except Exception as e:
             print(e)

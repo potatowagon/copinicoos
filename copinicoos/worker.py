@@ -32,6 +32,7 @@ class Worker(Resumable):
         self.workdir = workdir
         # create log files if not exist
         self.worker_log = open(os.path.join(self.workdir, self.name + '_log.txt'), 'w+')
+        self.worker_log.close()
         progress_log_path = os.path.join(self.workdir, self.name + '_progress.txt')
         super().setup(progress_log_path)
 
