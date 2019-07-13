@@ -69,6 +69,7 @@ class Worker(Resumable):
             title = str(res_json["feed"]["entry"]["title"])
             product_uri = str(res_json["feed"]["entry"]["link"][0]["href"])
             product_uri = self.format_product_uri(product_uri)
+            os.remove(json_file)
             return title, product_uri
         except Exception as e:
             raise

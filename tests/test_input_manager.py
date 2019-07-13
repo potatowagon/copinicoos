@@ -1,8 +1,10 @@
 import json
+import os
 
 import pytest
 
 from copinicoos import InputManager
+from conftest import test_data_dir, test_dir
 
 def test_add_worker_success(creds):
     im = InputManager()
@@ -38,11 +40,11 @@ def test_get_total_results_from_query_success(query, input_manager_with_one_work
 
 @pytest.mark.parametrize(
     "arg", [
-        ("secrets1.json"),
+        (os.path.join(test_data_dir,"secrets1.json")),
         ('{"u1": "username", "p1": "password"}'),
         ('{"u1":"username"  ,\n "p1":"password"}'),
         ('{\n"u1" : "  username"  ,\n "p1":"password"\n}'),
-        (open('secrets2.json').read())    
+        (open(os.path.join(test_data_dir,'secrets2.json')).read())    
     ]
 )
 def test_get_json_creds_success(arg):
@@ -63,8 +65,8 @@ def test_get_json_creds_badfile(arg):
 
 @pytest.mark.parametrize(
     "json, expected_workers", [
-        (json.load(open("secrets1.json")), 1),
-        (json.load(open("secrets2.json")), 2)
+        (json.load(open(os.path.join(test_data_dir,'secrets1.json'))), 1),
+        (json.load(open(os.path.join(test_data_dir,'secrets2.json'))), 2)
     ]
 )
 def test_add_workers_from_json_creds(json, expected_workers):
@@ -73,7 +75,3 @@ def test_add_workers_from_json_creds(json, expected_workers):
     assert len(im.worker_list) == expected_workers
     for worker in im.worker_list:
         assert type(worker).__name__ == "Worker"
-
-def test_format_query(query, formatted_query):
-    fq = InputManager.format_query(query)
-    assert fq == formatted_query

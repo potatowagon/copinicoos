@@ -6,6 +6,7 @@ import argparse
 from colorama import Fore
 
 from .worker import Worker
+from . import query_formatter
 
 class InputManager():
     def __init__(self):
@@ -14,27 +15,6 @@ class InputManager():
         self.args.download_location = os.getcwd()
         self.args.polling_interval = 6
         self.args.offline_retries = 2
-
-    @staticmethod
-    def format_query(query):
-        query = query.strip()
-
-        request_done_str = "Request Done: "
-        if query.startswith(request_done_str):
-            query = query.replace(request_done_str, "")
-        
-        if query.startswith('"') and query.endswith('"'):
-            query = query[1:len(query)-1]
-
-        if query.startswith("'") and query.endswith("'"):
-            query = query[1:len(query)-1]
-        
-        if not '\\"' in query:
-            if '"' in query:
-                query = query.replace('"', '\\"')
-
-        query = '"https://scihub.copernicus.eu/dhus/search?q=' + query + '&format=json"'
-        return query
 
     @staticmethod
     def is_worker_auth_valid(username, password):
@@ -91,7 +71,7 @@ class InputManager():
             query = input()
             self.args.total_results = self.get_total_results_from_query(query)
         print(Fore.GREEN + str(self.args.total_results) + " products found.")
-        self.args.query = InputManager.format_query(query)
+        self.args.query = query_formatter.req_search_res_json(query)
 
     def _get_download_location_input_i(self):
         print(Fore.YELLOW + "Default download directory set to " + self.args.download_location + "\nEnter new path to change, if not will use default.")
@@ -163,7 +143,7 @@ class InputManager():
             json_creds = self.get_json_creds(args.credentials)
             self.add_workers_from_json_creds(json_creds)
             self.get_total_results_from_query(args.query)
-            self.args.query = InputManager.format_query(args.query)
+            self.args.query = query_formatter.req_search_res_json(args.query)
             self.args.download_location = args.download_location
             self.args.offline_retries = args.offline_retries
             self.args.polling_interval = args.polling_interval
@@ -205,7 +185,7 @@ class InputManager():
             return False
 
     def get_total_results_from_query(self, query):
-        query = InputManager.format_query(query)
+        query = query_formatter.req_search_res_json(query)
         print("\nSending query: " + query + "\n")
         try:
             self.args.total_results = self.return_worker_list()[0].query_total_results(query)

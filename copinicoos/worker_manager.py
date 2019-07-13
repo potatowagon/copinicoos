@@ -4,6 +4,7 @@ import asyncio
 from colorama import Fore
 
 from .resumable import Resumable
+from . import query_formatter
 
 class WorkerManager(Resumable):
     def __init__(self, worker_list, query, total_result, download_location, polling_interval, offline_retries):
@@ -32,13 +33,8 @@ class WorkerManager(Resumable):
         for worker in self.worker_list:
             worker.setup(self.workdir)
 
-    def adjust_query_for_specific_product(self):
-        if not "&rows=1" in self.query:
-            self.query = self.query[:(len(self.query)-1)] + "&rows=1" 
-        if not "&start=" in self.query:
-            self.query = self.query[:len(self.query)] + "&start=" 
-
     async def run_workers(self):
+        self.query = query_formatter.adjust_for_specific_product(self.query)
         ready_worker_queue = asyncio.Queue(maxsize=len(self.worker_list))
         resume_point = self.load_resume_point()
         if resume_point == None:
