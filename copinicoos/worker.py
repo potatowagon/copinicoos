@@ -4,6 +4,7 @@ import json
 import time
 from multiprocessing import Lock
 from threading import Thread
+import logging 
 
 import colorama
 from colorama import Fore
@@ -23,7 +24,7 @@ class Worker(Resumable):
         self.download_location = None
         self.polling_interval = None
         self.offline_retries = None
-        self.worker_log = None
+        self.logger = None
     
     def set_name(self, name):
         self.name = name
@@ -31,8 +32,11 @@ class Worker(Resumable):
     def setup(self, workdir):
         self.workdir = workdir
         # create log files if not exist
-        self.worker_log = open(os.path.join(self.workdir, self.name + '_log.txt'), 'w+')
-        self.worker_log.close()
+        logger = logging.getLogger(self.name)
+        h = logging.FileHandler(os.path.join(self.workdir, self.name + '_log.txt'))
+        logger.addHandler(h)
+        logger.setLevel("DEBUG")
+        self.logger = logger
         progress_log_path = os.path.join(self.workdir, self.name + '_progress.txt')
         super().setup(progress_log_path)
 

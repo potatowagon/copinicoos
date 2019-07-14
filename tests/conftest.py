@@ -4,6 +4,7 @@ reusable fixtures are here
 import json
 import os
 import shutil
+import logging
 
 import pytest
 
@@ -14,6 +15,13 @@ from copinicoos.worker import Worker
 
 test_dir = os.path.dirname(os.path.realpath(__file__))
 test_data_dir = os.path.join(test_dir, "test_data")
+
+def close_all_loggers():
+    loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
+    for logger in loggers:
+        for handler in logger.handlers:
+            if isinstance(handler, logging.FileHandler):
+                handler.close()
 
 @pytest.fixture(scope="session")
 def creds():
@@ -71,6 +79,7 @@ def cleanup():
         if item.startswith("S") and item.endswith(".zip"):
             os.remove(os.path.join(test_dir, item))
         if item == "copinicoos_logs":
+            close_all_loggers()
             shutil.rmtree(os.path.join(test_dir, item))
 
 @pytest.fixture()
