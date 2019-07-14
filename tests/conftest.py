@@ -77,6 +77,8 @@ def cleanup():
 def worker(creds, args):
     w = Worker(creds["u2"], creds["p2"])
     w.register_settings(args.query, args.download_location, args.polling_interval, args.offline_retries)
-    w.setup(test_dir)
+    logdir = os.path.join(test_dir, "copinicoos_logs")
+    os.mkdir(logdir)
+    w.setup(logdir)
     return w
             
