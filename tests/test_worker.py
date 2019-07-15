@@ -3,7 +3,7 @@ import random
 
 import pytest
 
-from conftest import test_data_dir
+from conftest import test_data_dir, get_worker_logs
 
 @pytest.mark.parametrize(
     "result_num", [
@@ -33,3 +33,6 @@ def test_download_began(worker):
 )
 def test_run_offline(worker, result_num):
     worker.run(result_num)
+    log = worker.get_log()
+    assert "Product could be offline. Retrying after " in log
+

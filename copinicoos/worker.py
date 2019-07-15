@@ -203,3 +203,7 @@ class Worker(Resumable):
             cmd = self.workdir + '/dhusget.sh -u ' + str(self.username) + ' -p ' + str(self.password) + ' -T GRD -m "Sentinel-1" -c "' + str(self.lonlat) + '" -S ' + self.start_date + ' -E ' + self.end_date + ' -l 1 -P ' + str(page) + ' -o product -O ' + self.workdir + ' -w 5 -W 30 -L ' + self.workdir + '/dhusget_lock -n 4 -q ' + self.workdir + '/OSquery-result.xml -C ' + self.workdir + '/products-list.csv'
             print(cmd)
             subprocess.call(cmd, stdout=self.worker_log, stderr=self.worker_log, shell=True)
+
+    def get_log(self):
+        log_path = os.path.join(self.workdir, self.name + "_log.txt")
+        return open(log_path).read()
