@@ -5,6 +5,7 @@ import time
 from multiprocessing import Lock
 from threading import Thread
 import logging 
+import sys
 
 import colorama
 from colorama import Fore
@@ -31,11 +32,21 @@ class Worker(Resumable):
 
     def setup(self, workdir):
         self.workdir = workdir
-        # create log files if not exist
+
+        # log file handler
         logger = logging.getLogger(self.name)
+        f = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
         h = logging.FileHandler(os.path.join(self.workdir, self.name + '_log.txt'))
+        h.setFormatter(f)
+        h.setLevel(logging.INFO)
         logger.addHandler(h)
-        logger.setLevel("DEBUG")
+
+        #log to stream handler
+        sh = logging.StreamHandler(sys.stdout)
+        sh.setLevel(logging.DEBUG)
+        logger.addHandler(sh)
+
+        logger.setLevel(logging.DEBUG)
         self.logger = logger
         progress_log_path = os.path.join(self.workdir, self.name + '_progress.txt')
         super().setup(progress_log_path)
@@ -64,7 +75,7 @@ class Worker(Resumable):
         returns: title and product_uri, eg. "S1A_IW_GRDH_1SDV_20181011T115601_20181011T115626_024088_02A208_C886", "https://scihub.copernicus.eu/dhus/odata/v1/Products('7bc7da0c-8241-4bbe-8d59-1661667c6161')/$value"
         '''
         query = self.query + str(result_num) + '"'
-        print(query)
+        self.logger.debug(query)
         json_file = self.name + "_res.json"
         try:
             cmd = "wget --no-check-certificate --user=" + self.username + " --password=" + self.password + " -O " + json_file + " " + query
@@ -91,16 +102,16 @@ class Worker(Resumable):
             try:
                 title, product_uri = self.query_product_uri(result_number)
             except Exception as e:
-                print(e)
-                print(Fore.RED + "Error in querying product uri from result number.")
-                print("Retrying " + str(uri_query_retries) + " out of " + str(uri_query_max_retries) + " times.")
+                self.logger.error(e)
+                self.logger.error(Fore.RED + "Error in querying product uri from result number.")
+                self.logger.error("Retrying " + str(uri_query_retries) + " out of " + str(uri_query_max_retries) + " times.")
                 uri_query_retries += 1
         return title, product_uri
 
     def download_product(self, file_path, product_uri):
         try:
             cmd = "wget -O " + file_path + " --continue --user=" + self.username + " --password="+ self.password + " " + product_uri
-            print(Fore.YELLOW + cmd)
+            self.logger.info(Fore.YELLOW + cmd)
             subprocess.call(cmd)
         except Exception as e:
             raise
@@ -113,7 +124,7 @@ class Worker(Resumable):
         try:
             b = os.path.getsize(file_path)
         except Exception as e:
-            print(e)
+            self.logger.error(e)
             return False
         if b > 0:
             return True
@@ -139,7 +150,7 @@ class Worker(Resumable):
         pass
 
     def _hold_lock(self):
-        print(self.name + " has the lock. Ready to send requests...")
+        self.logger.debug(self.name + " has the lock. Ready to send requests...")
         time.sleep(5)
         self.request_lock.release()
 
@@ -159,23 +170,23 @@ class Worker(Resumable):
 
     def run(self, result_num, uri_query_max_retries=3):
         title, product_uri = self.query_product_uri_with_retries(result_num)
-        print(Fore.GREEN + "Begin downloading\n" + title + "\nat\n" + product_uri + "\n")
+        self.logger.info(Fore.GREEN + "Begin downloading\n" + title + "\nat\n" + product_uri + "\n")
         file_path = os.path.join(self.download_location, title + ".zip")
         self.download_product(file_path, product_uri)
         if not self.download_began(file_path):
-            print(Fore.YELLOW + "Product could be offline. Retrying after " + str(self.polling_interval) + " seconds.")
+            self.logger.warning(Fore.YELLOW + "Product could be offline. Retrying after " + str(self.polling_interval) + " seconds.")
             for i in range(1, self.offline_retries + 1):
                 time.sleep(self.polling_interval)
                 self.download_product(file_path, product_uri)
                 if self.download_began(file_path):
                     break
             if i == self.offline_retries:
-                print(Fore.RED + "Failed to download " + title + ". Moving on to next product.")
+                self.logger.info(Fore.RED + "Failed to download " + title + ". Moving on to next product.")
 
         
     def run_in_seperate_process(self, result_num, ready_worker_queue):
         self.update_resume_point(result_num)
-        print("running worker", self.name)
+        self.logger.info("running worker" + self.name)
         self.run(result_num)
         time.sleep(5)
         ready_worker_queue.put_nowait(self)
