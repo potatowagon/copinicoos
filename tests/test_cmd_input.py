@@ -28,6 +28,8 @@ def test_unit(query, login):
         ("@" + query_txt_path, secrets2_json_path),    
         ]
 )
+
+@pytest.mark.e2e
 def test_successful_login_from_cli(query, login):
     cmd = "py -m copinicoos"
     subprocess.call(["py", "-m", "copinicoos", query, login])
