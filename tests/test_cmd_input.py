@@ -23,8 +23,8 @@ def test_unit(query, login):
 
 @pytest.mark.parametrize(
     "query, login", [
-        ("@" + query_txt_path, "@" + secrets1_json_path),
-        ("@" + query_txt_path, secrets1_json_path),
+        #("@" + query_txt_path, "@" + secrets1_json_path),
+        #("@" + query_txt_path, secrets1_json_path),
         ("@" + query_txt_path, secrets2_json_path),    
         ]
 )
