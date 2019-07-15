@@ -5,6 +5,8 @@ import json
 import os
 import shutil
 import logging
+import sys
+import subprocess
 
 import pytest
 
@@ -15,6 +17,7 @@ from copinicoos.worker import Worker
 
 test_dir = os.path.dirname(os.path.realpath(__file__))
 test_data_dir = os.path.join(test_dir, "test_data")
+log_dir = os.path.join(test_dir, "copinicoos_logs")
 
 def close_all_loggers():
     loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
@@ -59,7 +62,7 @@ def formatted_query1():
     return '"https://scihub.copernicus.eu/dhus/search?q=( footprint:\\"Intersects(POLYGON((91.45532862800384 22.42016942838278,91.34620270146559 22.43895934481047,91.32598614177974 22.336847270362682,91.4350291249018 22.31804599405974,91.45532862800384 22.42016942838278)))\\" ) AND ( (platformname:Sentinel-1 AND producttype:GRD))&format=json&rows=1&start='
 
 @pytest.fixture()
-def args(formatted_query1):
+def w_args(formatted_query1):
     args = Args()
     args.query = formatted_query1
     args.total_results = 200
@@ -69,8 +72,18 @@ def args(formatted_query1):
     return args
 
 @pytest.fixture()
-def worker_manager(worker_list_1_worker, args):
-    return WorkerManager.init_from_args(worker_list_1_worker, args)
+def wm_args(formatted_query):
+    args = Args()
+    args.query = formatted_query
+    args.total_results = 200
+    args.download_location = os.getcwd()
+    args.offline_retries = 2
+    args.polling_interval = 6
+    return args
+
+@pytest.fixture()
+def worker_manager(worker_list_1_worker, wm_args):
+    return WorkerManager.init_from_args(worker_list_1_worker, wm_args)
 
 @pytest.fixture(autouse=True)
 def cleanup():
@@ -82,12 +95,48 @@ def cleanup():
             close_all_loggers()
             shutil.rmtree(os.path.join(test_dir, item))
 
-@pytest.fixture()
-def worker(creds, args):
-    w = Worker(creds["u2"], creds["p2"])
-    w.register_settings(args.query, args.download_location, args.polling_interval, args.offline_retries)
+def init_worker_type(worker_class, creds, w_args):
+    w = getattr(sys.modules[__name__], worker_class).__init__(creds["u2"], creds["p2"])
+    w.register_settings(w_args.query, w_args.download_location, w_args.polling_interval, w_args.offline_retries)
     logdir = os.path.join(test_dir, "copinicoos_logs")
     os.mkdir(logdir)
     w.setup(logdir)
     return w
+
+@pytest.fixture()
+def worker(creds, w_args):
+    w = Worker(creds["u2"], creds["p2"])
+    w.register_settings(w_args.query, w_args.download_location, w_args.polling_interval, w_args.offline_retries)
+    logdir = os.path.join(test_dir, "copinicoos_logs")
+    os.mkdir(logdir)
+    w.setup(logdir)
+    return w
+
+def get_worker_logs():
+    return open(os.path.join(log_dir, "copnicoos2_log.txt"))
+
+@pytest.fixture()
+def worker_download_offline(creds, w_args):
+    pass
+    
+
             
+class MockWokerProductOffline(Worker):
+    def download_product(self, file_path, product_uri):
+        try:
+            product_uri =  "https://github.com/potatowagon/copinicoos/blob/remove-dhusget/tests/test_data/S1A_offline.zip"
+            cmd = "wget -O " + file_path + " --continue " + product_uri
+            self.logger.info(cmd)
+            subprocess.call(cmd)
+        except Exception as e:
+            raise
+
+class MockWokerProductOnline(Worker):
+    def download_product(self, file_path, product_uri):
+        try:
+            product_uri =  "https://github.com/potatowagon/copinicoos/blob/remove-dhusget/tests/test_data/S1A_online.zip"
+            cmd = "wget -O " + file_path + " --continue " + product_uri
+            self.logger.info(cmd)
+            subprocess.call(cmd)
+        except Exception as e:
+            raise
