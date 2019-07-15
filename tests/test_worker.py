@@ -36,3 +36,17 @@ def test_run_offline(worker, result_num):
     log = worker.get_log()
     assert "Product could be offline. Retrying after " in log
 
+def test_run_offline_mock(worker_download_offline):
+    test_run_offline(worker_download_offline, 0)
+
+def test_fixture_worker_download_offline(worker_download_offline):
+    w = worker_download_offline
+    file_path = os.path.join(w.download_location, "S1A_offline.zip")
+    w.download_product(file_path, "bla bla")
+    assert os.path.exists(file_path) == True
+
+def test_fixture_worker_download_online(worker_download_online):
+    w = worker_download_online
+    file_path = os.path.join(w.download_location, "S1A_online.zip")
+    w.download_product(file_path, "bla bla")
+    assert os.path.exists(file_path) == True

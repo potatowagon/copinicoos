@@ -66,7 +66,7 @@ def w_args(formatted_query1):
     args = Args()
     args.query = formatted_query1
     args.total_results = 200
-    args.download_location = os.getcwd()
+    args.download_location = test_dir
     args.offline_retries = 2
     args.polling_interval = 6
     return args
@@ -76,7 +76,7 @@ def wm_args(formatted_query):
     args = Args()
     args.query = formatted_query
     args.total_results = 200
-    args.download_location = os.getcwd()
+    args.download_location = test_dir
     args.offline_retries = 2
     args.polling_interval = 6
     return args
@@ -96,7 +96,7 @@ def cleanup():
             shutil.rmtree(os.path.join(test_dir, item))
 
 def init_worker_type(worker_class, creds, w_args):
-    w = getattr(sys.modules[__name__], worker_class).__init__(creds["u2"], creds["p2"])
+    w = getattr(sys.modules[__name__], worker_class)(creds["u2"], creds["p2"])
     w.register_settings(w_args.query, w_args.download_location, w_args.polling_interval, w_args.offline_retries)
     logdir = os.path.join(test_dir, "copinicoos_logs")
     os.mkdir(logdir)
@@ -105,11 +105,7 @@ def init_worker_type(worker_class, creds, w_args):
 
 @pytest.fixture()
 def worker(creds, w_args):
-    w = Worker(creds["u2"], creds["p2"])
-    w.register_settings(w_args.query, w_args.download_location, w_args.polling_interval, w_args.offline_retries)
-    logdir = os.path.join(test_dir, "copinicoos_logs")
-    os.mkdir(logdir)
-    w.setup(logdir)
+    w = init_worker_type("Worker", creds, w_args)
     return w
 
 def get_worker_logs():
@@ -117,15 +113,17 @@ def get_worker_logs():
 
 @pytest.fixture()
 def worker_download_offline(creds, w_args):
-    pass
+    return init_worker_type("MockWokerProductOffline", creds, w_args)
     
-
+@pytest.fixture()
+def worker_download_online(creds, w_args):
+    return init_worker_type("MockWokerProductOnline", creds, w_args)
             
 class MockWokerProductOffline(Worker):
     def download_product(self, file_path, product_uri):
         try:
-            product_uri =  "https://github.com/potatowagon/copinicoos/blob/remove-dhusget/tests/test_data/S1A_offline.zip"
-            cmd = "wget -O " + file_path + " --continue " + product_uri
+            product_uri =  os.path.join(test_data_dir, "S1A_offline.zip")
+            cmd = "cp " + product_uri + " " + file_path
             self.logger.info(cmd)
             subprocess.call(cmd)
         except Exception as e:
