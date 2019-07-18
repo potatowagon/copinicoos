@@ -2,7 +2,7 @@ import os
 import subprocess
 import json
 import time
-from multiprocessing import Lock
+from multiprocessing import Lock, Process
 from threading import Thread
 import logging 
 import sys
@@ -100,6 +100,7 @@ class Worker(Resumable):
         uri_query_max_retries = max_retries
         while uri_query_retries <= uri_query_max_retries and (title is None or product_uri is None):
             try:
+                self._prepare_to_request()
                 title, product_uri = self.query_product_uri(result_number)
             except Exception as e:
                 self.logger.error(e)
@@ -159,20 +160,20 @@ class Worker(Resumable):
             self.logger.warning(Fore.YELLOW + "Product could be offline. Retrying after " + str(self.polling_interval) + " seconds.")
             for i in range(1, self.offline_retries + 1):
                 time.sleep(self.polling_interval)
+                self._prepare_to_request()
                 self.download_product(file_path, product_uri)
                 if self.download_began(file_path):
                     break
             if i == self.offline_retries:
                 self.logger.info(Fore.RED + "Failed to download " + title + ". Moving on to next product.")
 
-        
     def run_in_seperate_process(self, result_num, ready_worker_queue):
         self.update_resume_point(result_num)
         self.logger.info("running worker" + self.name)
-        self.run(result_num)
-        time.sleep(5)
+        p = Process(target=self.run, args=(result_num,))
+        p.start()
+        p.join()
         ready_worker_queue.put_nowait(self)
-        return "success"
 
     def get_log(self):
         log_path = os.path.join(self.workdir, self.name + "_log.txt")
