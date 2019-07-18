@@ -131,24 +131,6 @@ class Worker(Resumable):
         else:
             return False
 
-    def download(self, result_num):
-        '''
-        self.update_resume_point(result_num)
-        self._prepare_to_request()
-        product_uri = self.query_product_uri(result_num)
-        self._prepare_to_request()
-        download_status = self.download(product_uri)
-        i = 0
-        while download_status != "success" and i < self.offline_retries:
-            #sleep
-            #download
-            pass
-        #update worker log
-        ready_worker_queue.put_nowait(self)
-        return download_status
-        '''
-        pass
-
     def _hold_lock(self):
         self.logger.debug(self.name + " has the lock. Ready to send requests...")
         time.sleep(5)
@@ -191,18 +173,6 @@ class Worker(Resumable):
         time.sleep(5)
         ready_worker_queue.put_nowait(self)
         return "success"
-        
-    def run_worker(self):
-        for page in range(int(self.resume), int(self.total_results) + 1):
-            self.overwrite_file(self.workdir + '/progress.txt', str(page))
-
-            self.request_lock.acquire()
-            hold_lock_thread = Thread(target=self._hold_lock)
-            hold_lock_thread.start()
-
-            cmd = self.workdir + '/dhusget.sh -u ' + str(self.username) + ' -p ' + str(self.password) + ' -T GRD -m "Sentinel-1" -c "' + str(self.lonlat) + '" -S ' + self.start_date + ' -E ' + self.end_date + ' -l 1 -P ' + str(page) + ' -o product -O ' + self.workdir + ' -w 5 -W 30 -L ' + self.workdir + '/dhusget_lock -n 4 -q ' + self.workdir + '/OSquery-result.xml -C ' + self.workdir + '/products-list.csv'
-            print(cmd)
-            subprocess.call(cmd, stdout=self.worker_log, stderr=self.worker_log, shell=True)
 
     def get_log(self):
         log_path = os.path.join(self.workdir, self.name + "_log.txt")
