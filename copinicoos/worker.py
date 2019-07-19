@@ -30,9 +30,7 @@ class Worker(Resumable):
     def set_name(self, name):
         self.name = name
 
-    def setup(self, workdir):
-        self.workdir = workdir
-
+    def _setup_logger(self):
         # log file handler
         logger = logging.getLogger(self.name)
         f = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
@@ -47,7 +45,11 @@ class Worker(Resumable):
         logger.addHandler(sh)
 
         logger.setLevel(logging.DEBUG)
-        self.logger = logger
+        return logger
+
+    def setup(self, workdir):
+        self.workdir = workdir
+        self.logger = self._setup_logger()
         progress_log_path = os.path.join(self.workdir, self.name + '_progress.txt')
         super().setup(progress_log_path)
 
@@ -153,6 +155,8 @@ class Worker(Resumable):
 
     def run(self, result_num, uri_query_max_retries=3):
         title, product_uri = self.query_product_uri_with_retries(result_num)
+        # initialising new logger because logger is shallow copied to new process and looses setup
+        self.logger = self._setup_logger()
         self.logger.info(Fore.GREEN + "Begin downloading\n" + title + "\nat\n" + product_uri + "\n")
         file_path = os.path.join(self.download_location, title + ".zip")
         self.download_product(file_path, product_uri)
@@ -163,6 +167,7 @@ class Worker(Resumable):
                 self._prepare_to_request()
                 self.download_product(file_path, product_uri)
                 if self.download_began(file_path):
+                    self.logger.info(Fore.GREEN + "Downloaded product " + title)
                     break
             if i == self.offline_retries:
                 self.logger.info(Fore.RED + "Failed to download " + title + ". Moving on to next product.")

@@ -7,6 +7,7 @@ import shutil
 import logging
 import sys
 import subprocess
+import time
 
 import pytest
 
@@ -85,7 +86,7 @@ def wm_args(formatted_query):
 def worker_manager(worker_list_1_worker, wm_args):
     return WorkerManager.init_from_args(worker_list_1_worker, wm_args)
 
-@pytest.fixture(autouse=True)
+#@pytest.fixture(autouse=True)
 def cleanup():
     yield
     for item in os.listdir(test_dir):
@@ -126,6 +127,7 @@ class MockWokerProductOffline(Worker):
             cmd = "cp " + product_uri + " " + file_path
             self.logger.info(cmd)
             subprocess.call(cmd)
+            time.sleep(3)
         except Exception as e:
             raise
 
@@ -136,5 +138,6 @@ class MockWokerProductOnline(Worker):
             cmd = "wget -O " + file_path + " --continue " + product_uri
             self.logger.info(cmd)
             subprocess.call(cmd)
+            time.sleep(10)
         except Exception as e:
             raise

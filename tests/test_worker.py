@@ -1,5 +1,7 @@
 import os
 import random
+import asyncio
+import re
 
 import pytest
 
@@ -44,9 +46,27 @@ def test_fixture_worker_download_offline(worker_download_offline):
     file_path = os.path.join(w.download_location, "S1A_offline.zip")
     w.download_product(file_path, "bla bla")
     assert os.path.exists(file_path) == True
+    assert file_path in  w.get_log()
 
 def test_fixture_worker_download_online(worker_download_online):
     w = worker_download_online
     file_path = os.path.join(w.download_location, "S1A_online.zip")
     w.download_product(file_path, "bla bla")
     assert os.path.exists(file_path) == True
+    log = w.get_log()
+    assert file_path in log == True
+    assert "https://github.com/potatowagon/copinicoos" in log == True
+
+def setup_worker_manager(worker_manager, worker_list):
+    worker_manager.worker_list = worker_list
+    worker_manager.setup_workdir()
+    return worker_manager
+
+def test_run_in_seperate_process_one_worker(worker_manager, worker_download_online):
+    wm = setup_worker_manager(worker_manager, [worker_download_online])
+    # download first 3 results
+    wm.total_results = 3
+    asyncio.run(wm.run_workers())
+    log = worker_download_online.get_log()
+    assert "Begin downloading" in log == True
+    assert "Downloaded product " in log == True
