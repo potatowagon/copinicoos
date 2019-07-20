@@ -5,7 +5,7 @@ import re
 
 import pytest
 
-from conftest import test_data_dir, get_worker_logs
+from conftest import test_data_dir, test_dir
 
 @pytest.mark.parametrize(
     "result_num", [
@@ -69,4 +69,7 @@ def test_run_in_seperate_process_one_worker(worker_manager, worker_download_onli
     asyncio.run(wm.run_workers())
     log = worker_download_online.get_log()
     assert "Begin downloading" in log 
-    assert "Downloaded product " in log 
+    assert "Downloaded product " in log
+    if "DEBUG" in log:
+        assert "lock" in log 
+

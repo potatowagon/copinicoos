@@ -33,16 +33,18 @@ class Worker(Resumable):
     def _setup_logger(self):
         # log file handler
         logger = logging.getLogger(self.name)
-        f = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
-        h = logging.FileHandler(os.path.join(self.workdir, self.name + '_log.txt'))
-        h.setFormatter(f)
-        h.setLevel(logging.INFO)
-        logger.addHandler(h)
+        logger.propagate = False
+        if not logger.hasHandlers():
+            f = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+            fh = logging.FileHandler(os.path.join(self.workdir, self.name + '_log.txt'))
+            fh.setFormatter(f)
+            fh.setLevel(logging.DEBUG)
+            logger.addHandler(fh)
 
-        #log to stream handler
-        sh = logging.StreamHandler(sys.stdout)
-        sh.setLevel(logging.DEBUG)
-        logger.addHandler(sh)
+            #log to stream handler
+            sh = logging.StreamHandler(stream=sys.stdout)
+            sh.setLevel(logging.DEBUG)
+            logger.addHandler(sh)
 
         logger.setLevel(logging.DEBUG)
         return logger
@@ -135,6 +137,7 @@ class Worker(Resumable):
             return False
 
     def _hold_lock(self):
+        self.logger = self._setup_logger()
         self.logger.debug(self.name + " has the lock. Ready to send requests...")
         time.sleep(5)
         self.request_lock.release()

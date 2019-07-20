@@ -92,14 +92,14 @@ def cleanup():
     for item in os.listdir(test_dir):
         if item.startswith("S") and item.endswith(".zip"):
             os.remove(os.path.join(test_dir, item))
-        if item == "copinicoos_logs":
+        if "_logs" in item and not "." in item:
             close_all_loggers()
             shutil.rmtree(os.path.join(test_dir, item))
 
 def init_worker_type(worker_class, creds, w_args):
     w = getattr(sys.modules[__name__], worker_class)(creds["u2"], creds["p2"])
     w.register_settings(w_args.query, w_args.download_location, w_args.polling_interval, w_args.offline_retries)
-    logdir = os.path.join(test_dir, "copinicoos_logs")
+    logdir = os.path.join(test_dir, w.name + "_logs")
     if not os.path.exists(logdir):
         os.mkdir(logdir)
     w.setup(logdir)
@@ -109,9 +109,6 @@ def init_worker_type(worker_class, creds, w_args):
 def worker(creds, w_args):
     w = init_worker_type("Worker", creds, w_args)
     return w
-
-def get_worker_logs():
-    return open(os.path.join(log_dir, "copnicoos2_log.txt"))
 
 @pytest.fixture()
 def worker_download_offline(creds, w_args):
