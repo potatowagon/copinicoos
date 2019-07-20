@@ -73,3 +73,16 @@ def test_run_in_seperate_process_one_worker(worker_manager, worker_download_onli
     if "DEBUG" in log:
         assert "lock" in log 
 
+def test_run_in_seperate_process_one_worker_offline(worker_manager, worker_download_offline):
+    wm = setup_worker_manager(worker_manager, [worker_download_offline])
+    # download first 3 results
+    wm.total_results = 3
+    asyncio.run(wm.run_workers())
+    log = worker_download_offline.get_log()
+    total_retries = wm.total_results * worker_download_offline.offline_retries
+    assert log.count("Retry attempt") == total_retries
+    download_attempts = total_retries + wm.total_results
+    assert log.count("Begin downloading") == download_attempts
+    assert log.count("Product could be offline.") == download_attempts
+    if "DEBUG" in log:
+        assert "lock" in log 
