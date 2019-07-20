@@ -171,6 +171,8 @@ class Worker(Resumable):
                     break
             if i == self.offline_retries:
                 self.logger.info(Fore.RED + "Failed to download " + title + ". Moving on to next product.")
+        else:
+            self.logger.info(Fore.GREEN + "Downloaded product " + title)
 
     def run_in_seperate_process(self, result_num, ready_worker_queue):
         self.update_resume_point(result_num)

@@ -86,7 +86,7 @@ def wm_args(formatted_query):
 def worker_manager(worker_list_1_worker, wm_args):
     return WorkerManager.init_from_args(worker_list_1_worker, wm_args)
 
-#@pytest.fixture(autouse=True)
+@pytest.fixture(autouse=True)
 def cleanup():
     yield
     for item in os.listdir(test_dir):
@@ -100,7 +100,8 @@ def init_worker_type(worker_class, creds, w_args):
     w = getattr(sys.modules[__name__], worker_class)(creds["u2"], creds["p2"])
     w.register_settings(w_args.query, w_args.download_location, w_args.polling_interval, w_args.offline_retries)
     logdir = os.path.join(test_dir, "copinicoos_logs")
-    os.mkdir(logdir)
+    if not os.path.exists(logdir):
+        os.mkdir(logdir)
     w.setup(logdir)
     return w
 

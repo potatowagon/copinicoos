@@ -17,7 +17,7 @@ from conftest import test_data_dir, get_worker_logs
 def test_query_product_uri_success(worker, result_num):
     title, product_uri = worker.query_product_uri(result_num)
     try:
-        assert title.startswith("S1A") == True
+        assert title.startswith("S") == True
         assert product_uri.startswith('"https://scihub.copernicus.eu/dhus/odata/v1/Products(') == True
         assert product_uri.endswith('/$value"') == True
     except Exception as e:
@@ -50,12 +50,12 @@ def test_fixture_worker_download_offline(worker_download_offline):
 
 def test_fixture_worker_download_online(worker_download_online):
     w = worker_download_online
-    file_path = os.path.join(w.download_location, "S1A_online.zip")
-    w.download_product(file_path, "bla bla")
-    assert os.path.exists(file_path) == True
+    downloaded_file_path = os.path.join(w.download_location, "S1A_online.zip")
+    w.download_product(downloaded_file_path, "bla bla")
+    assert os.path.exists(downloaded_file_path) == True
     log = w.get_log()
-    assert file_path in log == True
-    assert "https://github.com/potatowagon/copinicoos" in log == True
+    assert downloaded_file_path in log
+    assert "https://github.com/potatowagon/copinicoos" in log
 
 def setup_worker_manager(worker_manager, worker_list):
     worker_manager.worker_list = worker_list
@@ -68,5 +68,5 @@ def test_run_in_seperate_process_one_worker(worker_manager, worker_download_onli
     wm.total_results = 3
     asyncio.run(wm.run_workers())
     log = worker_download_online.get_log()
-    assert "Begin downloading" in log == True
-    assert "Downloaded product " in log == True
+    assert "Begin downloading" in log 
+    assert "Downloaded product " in log 
