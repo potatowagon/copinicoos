@@ -132,21 +132,19 @@ def worker_download_offline2(creds, w_args):
 class MockWokerProductOffline(Worker):
     def download_product(self, file_path, product_uri):
         try:
-            product_uri =  os.path.join(test_data_dir, "S1A_offline.zip")
-            cmd = "cp " + product_uri + " " + file_path
+            product_uri =  "https://github.com/potatowagon/copinicoos/blob/remove-dhusget/tests/test_data/S1A_offline.zip?raw=true"
+            cmd = "wget -O " + file_path + " --continue " + product_uri
             self.logger.info(cmd)
             subprocess.call(cmd)
-            time.sleep(3)
         except Exception as e:
             raise
 
 class MockWokerProductOnline(Worker):
     def download_product(self, file_path, product_uri):
         try:
-            product_uri =  "https://github.com/potatowagon/copinicoos/blob/remove-dhusget/tests/test_data/S1A_online.zip"
+            product_uri =  "https://github.com/potatowagon/copinicoos/blob/remove-dhusget/tests/test_data/S1A_online.zip?raw=true"
             cmd = "wget -O " + file_path + " --continue " + product_uri
             self.logger.info(cmd)
             subprocess.call(cmd)
-            time.sleep(10)
         except Exception as e:
             raise
