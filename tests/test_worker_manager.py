@@ -11,4 +11,5 @@ def test_init_from_args(worker_list_1_worker, wm_args):
 
 def test_setup_workdir(worker_manager):
     worker_manager.setup_workdir()
-    assert os.path.exists(os.path.join(worker_manager.workdir, 'WorkerManager_progress.txt')) == True
+    assert os.path.exists(os.path.join(worker_manager.workdir, 'WorkerManager_progress.txt'))
+

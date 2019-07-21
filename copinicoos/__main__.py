@@ -1,5 +1,4 @@
 import sys
-import asyncio
 
 from .input_manager import InputManager
 from .worker_manager import WorkerManager
@@ -12,4 +11,4 @@ else:
 
 worker_manager = WorkerManager.init_from_args(input_manager.return_worker_list(), input_manager.return_args())
 worker_manager.setup_workdir()
-asyncio.run(worker_manager.run_workers())
+worker_manager.run_workers()

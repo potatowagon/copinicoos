@@ -88,7 +88,7 @@ def cleanup():
     for item in os.listdir(test_dir):
         if item.startswith("S") and item.endswith(".zip"):
             os.remove(os.path.join(test_dir, item))
-        if "_logs" in item and not "." in item:
+        if "_logs" in item:
             close_all_loggers()
             shutil.rmtree(os.path.join(test_dir, item))
 

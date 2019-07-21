@@ -2,7 +2,7 @@ import os
 import subprocess
 import json
 import time
-from multiprocessing import Lock, Process
+from multiprocessing import Lock
 from threading import Thread
 import logging 
 import sys
@@ -26,6 +26,7 @@ class Worker(Resumable):
         self.polling_interval = None
         self.offline_retries = None
         self.logger = None
+        self.return_msg = None 
     
     def set_name(self, name):
         self.name = name
@@ -48,6 +49,13 @@ class Worker(Resumable):
 
         logger.setLevel(logging.DEBUG)
         return logger
+
+    def _close_all_loggers(self):
+        loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
+        for logger in loggers:
+            for handler in logger.handlers:
+                if isinstance(handler, logging.FileHandler):
+                    handler.close()
 
     def setup(self, workdir):
         self.workdir = workdir
@@ -120,11 +128,7 @@ class Worker(Resumable):
             subprocess.call(cmd)
         except Exception as e:
             raise
-        '''
-        self.process = Process(target=None)
-        self.process.start()
-        '''
-
+      
     def download_began(self, file_path):
         try:
             b = os.path.getsize(file_path)
@@ -157,9 +161,8 @@ class Worker(Resumable):
         self.offline_retries = offline_retries
 
     def run(self, result_num, uri_query_max_retries=3):
+        status = None
         title, product_uri = self.query_product_uri_with_retries(result_num)
-        # initialising new logger because logger is shallow copied to new process and looses setup
-        self.logger = self._setup_logger()
         file_path = os.path.join(self.download_location, title + ".zip")
         self._prepare_to_request()
         self.logger.info(Fore.GREEN + "Begin downloading\n" + title + "\nat\n" + product_uri + "\n")
@@ -174,6 +177,7 @@ class Worker(Resumable):
                 self.download_product(file_path, product_uri)
                 if self.download_began(file_path):
                     self.logger.info(Fore.GREEN + "Downloaded product " + title)
+                    status = "SUCCESS"
                     break
                 else:
                     if i < self.offline_retries:
@@ -181,17 +185,23 @@ class Worker(Resumable):
             if i == self.offline_retries:
                 self.logger.info(Fore.YELLOW + "Product could be offline.")
                 self.logger.info(Fore.RED + "Failed to download " + title + ". Moving on to next product.")
+                status = "FAILED"
         else:
             self.logger.info(Fore.GREEN + "Downloaded product " + title)
+            status = "SUCCESS"
+        return self.name + " " + title + " " + status
+        
 
     def run_in_seperate_process(self, result_num, ready_worker_queue):
+        # Setting up logger again because logger is shallow copied to new process and looses setup
+        self.logger = self._setup_logger()
+        self.return_msg = None
         self.update_resume_point(result_num)
         self.logger.info("running worker" + self.name)
-        p = Process(target=self.run, args=(result_num,))
-        p.start()
-        p.join()
-        ready_worker_queue.put_nowait(self)
-
+        self.return_msg = self.run(result_num)
+        self._close_all_loggers()
+        ready_worker_queue.put(self)
+        
     def get_log(self):
         log_path = os.path.join(self.workdir, self.name + "_log.txt")
         return open(log_path).read()

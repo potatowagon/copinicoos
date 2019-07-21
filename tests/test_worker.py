@@ -1,6 +1,5 @@
 import os
 import random
-import asyncio
 import re
 from zipfile import ZipFile
 
@@ -68,18 +67,19 @@ def test_run_in_seperate_process_one_worker(worker_manager, worker_download_onli
     wm = setup_worker_manager(worker_manager, [worker_download_online1])
     # download first 3 results
     wm.total_results = 3
-    asyncio.run(wm.run_workers())
+    wm.run_workers()
     log = worker_download_online1.get_log()
     assert "Begin downloading" in log 
     assert "Downloaded product " in log
     if "DEBUG" in log:
         assert "lock" in log 
+    assert wm.get_log().count("SUCCESS") == wm.total_results
 
 def test_run_in_seperate_process_one_worker_offline(worker_manager, worker_download_offline1):
     wm = setup_worker_manager(worker_manager, [worker_download_offline1])
     # download first 3 results
     wm.total_results = 3
-    asyncio.run(wm.run_workers())
+    wm.run_workers()
     log = worker_download_offline1.get_log()
     total_retries = wm.total_results * worker_download_offline1.offline_retries
     assert log.count("Retry attempt") == total_retries
@@ -93,7 +93,6 @@ def check_online_file_downloaded_correctly():
     for item in os.listdir(test_dir):
         if item.startswith("S") and item.endswith(".zip"):
             mock_product = ZipFile(os.path.join(test_dir, item))
-            print(mock_product.infolist())
             with mock_product.open("S1A_online/tiny_file.txt") as txt_file:
                 txt = str(txt_file.read())
                 assert "this is just to occupy disk space." in txt
@@ -112,7 +111,7 @@ def test_run_in_seperate_process_two_workers_both_online(worker_manager, worker_
     wm = setup_worker_manager(worker_manager, [worker_download_online1, worker_download_online2])
     # download first 3 results
     wm.total_results = 3
-    asyncio.run(wm.run_workers())
+    wm.run_workers()
 
     combined_log = ""
 
@@ -126,6 +125,8 @@ def test_run_in_seperate_process_two_workers_both_online(worker_manager, worker_
         
     assert combined_log.count("Downloaded product") == wm.total_results
     check_online_file_downloaded_correctly()
+
+    assert wm.get_log().count("SUCCESS") == wm.total_results
 
 
 
