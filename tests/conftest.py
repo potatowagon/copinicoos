@@ -33,15 +33,11 @@ def creds():
 
 @pytest.fixture(scope="session")
 def worker_list_1_worker(creds):
+    """
+    Basic worker for querying total results only
+    """
     im = InputManager()
     im.add_worker(creds["u1"], creds["p1"])
-    return im.worker_list
-
-@pytest.fixture(scope="session")
-def worker_list_2_workers(creds):
-    im = InputManager()
-    im.add_worker(creds["u1"], creds["p1"])
-    im.add_worker(creds["u2"], creds["p2"])
     return im.worker_list
 
 @pytest.fixture()
@@ -96,8 +92,8 @@ def cleanup():
             close_all_loggers()
             shutil.rmtree(os.path.join(test_dir, item))
 
-def init_worker_type(worker_class, creds, w_args):
-    w = getattr(sys.modules[__name__], worker_class)(creds["u2"], creds["p2"])
+def init_worker_type(worker_class, creds, creds_index,  w_args):
+    w = getattr(sys.modules[__name__], worker_class)(creds["u" + creds_index], creds["p" + creds_index])
     w.register_settings(w_args.query, w_args.download_location, w_args.polling_interval, w_args.offline_retries)
     logdir = os.path.join(test_dir, w.name + "_logs")
     if not os.path.exists(logdir):
@@ -105,18 +101,33 @@ def init_worker_type(worker_class, creds, w_args):
     w.setup(logdir)
     return w
 
+###### Workers capable of running in stand alone mode 
+
 @pytest.fixture()
-def worker(creds, w_args):
-    w = init_worker_type("Worker", creds, w_args)
+def worker1(creds, w_args):
+    w = init_worker_type("Worker", creds, "1", w_args)
     return w
 
 @pytest.fixture()
-def worker_download_offline(creds, w_args):
-    return init_worker_type("MockWokerProductOffline", creds, w_args)
+def worker2(creds, w_args):
+    w = init_worker_type("Worker", creds, "2", w_args)
+    return w
+
+@pytest.fixture()
+def worker_download_offline1(creds, w_args):
+    return init_worker_type("MockWokerProductOffline", creds, "1", w_args)
     
 @pytest.fixture()
-def worker_download_online(creds, w_args):
-    return init_worker_type("MockWokerProductOnline", creds, w_args)
+def worker_download_online1(creds, w_args):
+    return init_worker_type("MockWokerProductOnline", creds, "1", w_args)
+
+@pytest.fixture()
+def worker_download_online2(creds, w_args):
+    return init_worker_type("MockWokerProductOnline", creds, "2", w_args)
+
+@pytest.fixture()
+def worker_download_offline2(creds, w_args):
+    return init_worker_type("MockWokerProductOffline", creds, "2", w_args)
             
 class MockWokerProductOffline(Worker):
     def download_product(self, file_path, product_uri):
