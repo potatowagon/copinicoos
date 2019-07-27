@@ -29,9 +29,10 @@ def test_download_began(worker1):
     assert worker1.download_began(os.path.join(test_data_dir, "S1A_offline.zip")) == False
     assert worker1.download_began(os.path.join(test_data_dir, "S1A_online.zip")) == True
 
+@pytest.mark.timeout(120)
 @pytest.mark.parametrize(
     "result_num", [
-        (random.randint(150,200))
+        (random.randint(150,220))
     ]
 )
 def test_run_offline(worker1, result_num):
