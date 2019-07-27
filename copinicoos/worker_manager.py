@@ -10,13 +10,24 @@ from .loggable import Loggable
 from . import query_formatter
 
 class WorkerManager(Resumable, Loggable):
+    '''
+    A WorkerManager manages the execution of Workers to download products.
+
+    Args:
+        worker_list ([<Worker>, ...]): a list of Workers
+        query (str): the search query
+        total_result (int): the total number of results from the search query 
+        download_location (str): directory path to where products will be downloaded
+        polling_interval (int): the number of seconds to wait before making the next request for an offline product
+        offline_retries (int): the number of retry attempts to download an offline product before giving up 
+    '''
     def __init__(self, worker_list, query, total_result, download_location, polling_interval, offline_retries):
         Resumable.__init__(self)
         Loggable.__init__(self)
         self.worker_list = worker_list
         self.name = "WorkerManager"
         self.query = query
-        self.total_results = total_result
+        self.total_results = int(total_result)
         self.offline_retries = offline_retries
         self.polling_interval = polling_interval
         self.download_location = download_location
@@ -25,9 +36,16 @@ class WorkerManager(Resumable, Loggable):
 
     @classmethod
     def init_from_args(self, worker_list, args):
+        '''Initialise an instance of WorkerManager from the Args recieved from InputManager
+
+        Args:
+            worker_list ([<Worker>, ...]): a list of Workers
+            args (Args): Args recieved from InputManager
+        '''
         return self(worker_list, args.query, args.total_results, args.download_location, args.polling_interval, args.offline_retries)
 
     def setup_workdir(self):
+        '''Sets up the folder where log files will be written to.'''
         self.workdir = os.path.join(self.download_location, "copinicoos_logs")
         if not os.path.exists(self.workdir):
             os.mkdir(self.workdir)
@@ -41,6 +59,11 @@ class WorkerManager(Resumable, Loggable):
             worker.setup(self.workdir)
 
     def run_workers(self):
+        '''Runs workers by assigning them a product index relative to the total number of products in the search query (starting from 0). 
+        Checks for any resume point and continues from there. 
+        Each Worker is given a product index to download, and is executed in a seperate Process. 
+        Free workers are queued in process.Queue 
+        '''
         self.query = query_formatter.adjust_for_specific_product(self.query)
         ready_worker_queue = Queue(maxsize=len(self.worker_list))
         resume_point = self.load_resume_point()
@@ -58,8 +81,8 @@ class WorkerManager(Resumable, Loggable):
                 else:
                     worker.run_in_seperate_process(worker_resume_point, ready_worker_queue)
             except Exception as e:
-                print(e)
-                print(Fore.RED + "Error in queueing workers")
+                self.logger.error(e)
+                self.logger.error(Fore.RED + "Error in queueing workers")
         
         for i in range (resume_point, int(self.total_results)):
             worker = ready_worker_queue.get()
