@@ -37,7 +37,7 @@ class Worker(Resumable, Loggable):
         self.workdir = workdir
         self.logger = self._setup_logger(self.name, self.workdir)
         progress_log_path = os.path.join(self.workdir, self.name + '_progress.txt')
-        super().setup(progress_log_path)
+        self._setup_progress_log(progress_log_path)
 
     def query_total_results(self, query):
         '''

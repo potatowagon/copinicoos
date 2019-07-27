@@ -35,7 +35,7 @@ class WorkerManager(Resumable, Loggable):
 
         #create log.txt if not exist
         progress_log_path = os.path.join(self.workdir, 'WorkerManager_progress.txt')
-        super().setup(progress_log_path)
+        self._setup_progress_log(progress_log_path)
 
         for worker in self.worker_list:
             worker.setup(self.workdir)
