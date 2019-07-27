@@ -32,7 +32,7 @@ def test_download_began(worker1):
 @pytest.mark.timeout(120)
 @pytest.mark.parametrize(
     "result_num", [
-        (random.randint(150,220))
+        (random.randint(150,300))
     ]
 )
 def test_run_offline(worker1, result_num):
