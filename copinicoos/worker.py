@@ -11,12 +11,14 @@ import colorama
 from colorama import Fore
 
 from .resumable import Resumable
+from .loggable import Loggable
 
-class Worker(Resumable):
+class Worker(Resumable, Loggable):
     request_lock = Lock()
 
     def __init__(self, username, password):
         Resumable.__init__(self)
+        Loggable.__init__(self)
         self.username = username
         self.password = password
         self.name = username
@@ -31,35 +33,9 @@ class Worker(Resumable):
     def set_name(self, name):
         self.name = name
 
-    def _setup_logger(self):
-        # log file handler
-        logger = logging.getLogger(self.name)
-        logger.propagate = False
-        if not logger.hasHandlers():
-            f = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
-            fh = logging.FileHandler(os.path.join(self.workdir, self.name + '_log.txt'))
-            fh.setFormatter(f)
-            fh.setLevel(logging.DEBUG)
-            logger.addHandler(fh)
-
-            #log to stream handler
-            sh = logging.StreamHandler(stream=sys.stdout)
-            sh.setLevel(logging.DEBUG)
-            logger.addHandler(sh)
-
-        logger.setLevel(logging.DEBUG)
-        return logger
-
-    def _close_all_loggers(self):
-        loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
-        for logger in loggers:
-            for handler in logger.handlers:
-                if isinstance(handler, logging.FileHandler):
-                    handler.close()
-
     def setup(self, workdir):
         self.workdir = workdir
-        self.logger = self._setup_logger()
+        self.logger = self._setup_logger(self.name, self.workdir)
         progress_log_path = os.path.join(self.workdir, self.name + '_progress.txt')
         super().setup(progress_log_path)
 
@@ -141,7 +117,7 @@ class Worker(Resumable):
             return False
 
     def _hold_lock(self):
-        self.logger = self._setup_logger()
+        self.logger = self._setup_logger(self.name, self.workdir)
         self.logger.debug(self.name + " has the lock. Ready to send requests...")
         time.sleep(5)
         self.request_lock.release()
@@ -194,14 +170,10 @@ class Worker(Resumable):
 
     def run_in_seperate_process(self, result_num, ready_worker_queue):
         # Setting up logger again because logger is shallow copied to new process and looses setup
-        self.logger = self._setup_logger()
+        self.logger = self._setup_logger(self.name, self.workdir)
         self.return_msg = None
         self.update_resume_point(result_num)
         self.logger.info("running worker" + self.name)
         self.return_msg = self.run(result_num)
         self._close_all_loggers()
         ready_worker_queue.put(self)
-        
-    def get_log(self):
-        log_path = os.path.join(self.workdir, self.name + "_log.txt")
-        return open(log_path).read()

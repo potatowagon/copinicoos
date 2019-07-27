@@ -6,11 +6,13 @@ from multiprocessing import Process, Queue
 from colorama import Fore
 
 from .resumable import Resumable
+from .loggable import Loggable
 from . import query_formatter
 
-class WorkerManager(Resumable):
+class WorkerManager(Resumable, Loggable):
     def __init__(self, worker_list, query, total_result, download_location, polling_interval, offline_retries):
         Resumable.__init__(self)
+        Loggable.__init__(self)
         self.worker_list = worker_list
         self.name = "WorkerManager"
         self.query = query
@@ -29,7 +31,7 @@ class WorkerManager(Resumable):
         self.workdir = os.path.join(self.download_location, "copinicoos_logs")
         if not os.path.exists(self.workdir):
             os.mkdir(self.workdir)
-        self.logger = self._setup_logger()
+        self.logger = self._setup_logger(self.name, self.workdir)
 
         #create log.txt if not exist
         progress_log_path = os.path.join(self.workdir, 'WorkerManager_progress.txt')
@@ -37,32 +39,6 @@ class WorkerManager(Resumable):
 
         for worker in self.worker_list:
             worker.setup(self.workdir)
-
-    def _setup_logger(self):
-        # log file handler
-        logger = logging.getLogger(self.name)
-        logger.propagate = False
-        if not logger.hasHandlers():
-            f = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
-            fh = logging.FileHandler(os.path.join(self.workdir, self.name + '_log.txt'))
-            fh.setFormatter(f)
-            fh.setLevel(logging.DEBUG)
-            logger.addHandler(fh)
-
-            #log to stream handler
-            sh = logging.StreamHandler(stream=sys.stdout)
-            sh.setLevel(logging.DEBUG)
-            logger.addHandler(sh)
-
-        logger.setLevel(logging.DEBUG)
-        return logger
-
-    def _close_all_loggers(self):
-        loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
-        for logger in loggers:
-            for handler in logger.handlers:
-                if isinstance(handler, logging.FileHandler):
-                    handler.close()
 
     def run_workers(self):
         self.query = query_formatter.adjust_for_specific_product(self.query)
@@ -104,6 +80,4 @@ class WorkerManager(Resumable):
         self._close_all_loggers()
         self.logger.info("Exiting...")
 
-    def get_log(self):
-        log_path = os.path.join(self.workdir, self.name + "_log.txt")
-        return open(log_path).read()
+    
