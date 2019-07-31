@@ -21,11 +21,8 @@ setup(
             "tox-travis>=0.12",
             "pytest>=4.6.2",
             "pytest-cov>=2.7.1",
-            "Pillow==6.1.0",
-            "Sphinx>=1.7.4",
-            "sphinx-autobuild>=0.7",
-            "sphinx-rtd-theme>=0.3",
+            "Pillow==6.1.0"
         ]
     },
-    python_requires=">=3.7",
+    python_requires=">=3.0",
 )
