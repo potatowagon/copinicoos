@@ -19,6 +19,7 @@ After cloning this repo, cd to root of this repo (where setup.py is) and
 ```
 pip install .
 ```
+This installs copinicoos into python's site-packages.
 
 ## Usage
 ### Interactive Mode
@@ -86,10 +87,13 @@ Logs can be found in a folder named `copinicoos_logs` in the same directory wher
 
 ## Development
 
+Source code is in `copinicoos\copinicoos`
+
 cd to where setup.py is and
 ```
-pip install -e .
+pip install -e .[dev]
 ```
+This installs the dependencies needed for the development environment found under setup.py extras, and runs copinicoos from the dev enviroment, which is to run the code in this repo. All changes are automatically reflected in the dev enviroment. 
 
 ### Architecture
 
