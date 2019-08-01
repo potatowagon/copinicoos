@@ -15,18 +15,18 @@ def req_search_res_json(query):
             if '"' in query:
                 query = query.replace('"', '\\"')
 
-        query = '"https://scihub.copernicus.eu/dhus/search?q=' + query + '&format=json"'
+        query = 'https://scihub.copernicus.eu/dhus/search?q=' + query + '&format=json'
         return query
 
 def adjust_for_specific_product(query):
-    if not query.startswith('"https://scihub.copernicus.eu/dhus/search?q=') and not query.endswith('&format=json"'):
+    if not query.startswith('https://scihub.copernicus.eu/dhus/search?q=') and not query.endswith('&format=json'):
         query = req_search_res_json(query)
     return append_rows_start(query)
         
 
 def append_rows_start(query):
     if not "&rows=1" in query:
-            query = query[:(len(query)-1)] + "&rows=1" 
+            query = query[:len(query)] + "&rows=1" 
     if not "&start=" in query:
         query = query[:len(query)] + "&start=" 
     return query

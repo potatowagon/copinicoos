@@ -62,7 +62,7 @@ class Worker(Resumable, Loggable):
         params: result number
         returns: title and product_uri, eg. "S1A_IW_GRDH_1SDV_20181011T115601_20181011T115626_024088_02A208_C886", "https://scihub.copernicus.eu/dhus/odata/v1/Products('7bc7da0c-8241-4bbe-8d59-1661667c6161')/$value"
         '''
-        query = self.query + str(result_num) + '"'
+        query = self.query + str(result_num) 
         self.logger.debug(query)
         json_file = self.name + "_res.json"
         try:

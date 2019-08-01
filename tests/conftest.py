@@ -52,11 +52,11 @@ def query():
 
 @pytest.fixture(scope="session")
 def formatted_query():
-    return '"https://scihub.copernicus.eu/dhus/search?q=( footprint:\\"Intersects(POLYGON((91.45532862800384 22.42016942838278,91.34620270146559 22.43895934481047,91.32598614177974 22.336847270362682,91.4350291249018 22.31804599405974,91.45532862800384 22.42016942838278)))\\" ) AND ( (platformname:Sentinel-1 AND producttype:GRD))&format=json"'
+    return 'https://scihub.copernicus.eu/dhus/search?q=( footprint:\"Intersects(POLYGON((91.45532862800384 22.42016942838278,91.34620270146559 22.43895934481047,91.32598614177974 22.336847270362682,91.4350291249018 22.31804599405974,91.45532862800384 22.42016942838278)))\" ) AND ( (platformname:Sentinel-1 AND producttype:GRD))&format=json'
 
 @pytest.fixture(scope="session")
 def formatted_query1():
-    return '"https://scihub.copernicus.eu/dhus/search?q=( footprint:\\"Intersects(POLYGON((91.45532862800384 22.42016942838278,91.34620270146559 22.43895934481047,91.32598614177974 22.336847270362682,91.4350291249018 22.31804599405974,91.45532862800384 22.42016942838278)))\\" ) AND ( (platformname:Sentinel-1 AND producttype:GRD))&format=json&rows=1&start='
+    return 'https://scihub.copernicus.eu/dhus/search?q=( footprint:\"Intersects(POLYGON((91.45532862800384 22.42016942838278,91.34620270146559 22.43895934481047,91.32598614177974 22.336847270362682,91.4350291249018 22.31804599405974,91.45532862800384 22.42016942838278)))\" ) AND ( (platformname:Sentinel-1 AND producttype:GRD))&format=json&rows=1&start='
 
 @pytest.fixture()
 def w_args(formatted_query1):
