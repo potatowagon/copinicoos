@@ -26,8 +26,8 @@ class InputManager():
         json_file = "res.json"
         sample_query = "https://scihub.copernicus.eu/dhus/search?q=*&rows=1&format=json"
         try:
-            cmd = "wget --no-check-certificate --user=" + username + " --password=" + password + " -O " + json_file + " " + sample_query
-            subprocess.call(cmd, shell=True)
+            cmd = ["wget", "--no-check-certificate", "--user=" + username, "--password=" + password, "-O", json_file, sample_query]
+            subprocess.call(cmd)
             res_json = json.load(open(json_file))
             if res_json["feed"] is not None:
                 os.remove(json_file)

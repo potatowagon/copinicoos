@@ -133,9 +133,9 @@ class MockWokerProductOffline(Worker):
     def download_product(self, file_path, product_uri):
         try:
             product_uri =  "https://github.com/potatowagon/copinicoos/blob/remove-dhusget/tests/test_data/S1A_offline.zip?raw=true"
-            cmd = "wget -O " + file_path + " --continue " + product_uri
+            cmd = ["wget", "-O", file_path, "--continue", product_uri]
             self.logger.info(cmd)
-            subprocess.call(cmd, shell=True)
+            subprocess.call(cmd)
         except Exception as e:
             raise
 
@@ -143,8 +143,8 @@ class MockWokerProductOnline(Worker):
     def download_product(self, file_path, product_uri):
         try:
             product_uri =  "https://github.com/potatowagon/copinicoos/blob/remove-dhusget/tests/test_data/S1A_online.zip?raw=true"
-            cmd = "wget -O " + file_path + " --continue " + product_uri
+            cmd = ["wget", "-O", file_path, "--continue", product_uri]
             self.logger.info(cmd)
-            subprocess.call(cmd, shell=True)
+            subprocess.call(cmd)
         except Exception as e:
             raise
