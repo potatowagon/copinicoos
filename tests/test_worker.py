@@ -30,6 +30,7 @@ def test_download_began(worker1):
     assert worker1.download_began(os.path.join(test_data_dir, "S1A_online.zip")) == True
 
 @pytest.mark.timeout(120)
+@pytest.mark.skip(reason="hitting too many online products")
 @pytest.mark.parametrize(
     "result_num", [
         (random.randint(150,300))
@@ -64,6 +65,7 @@ def setup_worker_manager(worker_manager, worker_list):
     worker_manager.setup_workdir()
     return worker_manager
 
+@pytest.mark.timeout(300)
 def test_run_in_seperate_process_one_worker(worker_manager, worker_download_online1):
     wm = setup_worker_manager(worker_manager, [worker_download_online1])
     # download first 3 results
@@ -76,6 +78,7 @@ def test_run_in_seperate_process_one_worker(worker_manager, worker_download_onli
         assert "lock" in log 
     assert wm.get_log().count("SUCCESS") == wm.total_results
 
+@pytest.mark.timeout(300)
 def test_run_in_seperate_process_one_worker_offline(worker_manager, worker_download_offline1):
     wm = setup_worker_manager(worker_manager, [worker_download_offline1])
     # download first 3 results
@@ -107,7 +110,7 @@ def check_online_file_downloaded_correctly():
                 except Exception as e:
                     pytest.fail(e)
             
-
+@pytest.mark.timeout(300)
 def test_run_in_seperate_process_two_workers_both_online(worker_manager, worker_download_online1, worker_download_online2):
     wm = setup_worker_manager(worker_manager, [worker_download_online1, worker_download_online2])
     # download first 3 results
