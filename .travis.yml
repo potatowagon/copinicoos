@@ -12,8 +12,8 @@ install:
 
 script:
   - test_data_dir=/tests/test_data/
-  - echo {\"u1\":\"${USERNAME1}\",\"p1\":\"${PASSWORD1}\"} > $(pwd)${test_data_dir}secrets1.json
-  - echo {\"u1\":\"${USERNAME1}\",\"p1\":\"${PASSWORD1}\",\"u2\":\"${USERNAME2}\",\"p2\":\"${PASSWORD2}\"} > $(pwd)${test_data_dir}secrets2.json
+  - echo \{\"u1\":\"${USERNAME1}\",\"p1\":\"${PASSWORD1}\"\} > $(pwd)${test_data_dir}secrets1.json
+  - echo \{\"u1\":\"${USERNAME1}\",\"p1\":\"${PASSWORD1}\",\"u2\":\"${USERNAME2}\",\"p2\":\"${PASSWORD2}\"\} > $(pwd)${test_data_dir}secrets2.json
   - cat $(pwd)${test_data_dir}secrets1.json
   - tox
   - codecov 
