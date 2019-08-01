@@ -10,8 +10,10 @@ python:
 install:
   - pip install tox-travis codecov
 
-script: 
+script:
+  - testdir=/tests/test_data/
+  - echo {\"u1\":\"${USERNAME1}\",\"p1\":\"${PASSWORD1}\"} > ${testdir}secrets1.json
+  - echo {\"u1\":\"${USERNAME1}\",\"p1\":\"${PASSWORD1}\",\"u2\":\"${USERNAME2}\",\"p2\":\"${PASSWORD2}\"} > ${testdir}secrets2.json
   - tox
   - codecov 
   - sleep 10  # Github build status would not be updated by "codecov" otherwise
-  
