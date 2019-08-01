@@ -49,7 +49,6 @@ def test_fixture_worker_download_offline(worker_download_offline1):
     file_path = os.path.join(w.download_location, "S1A_offline.zip")
     w.download_product(file_path, "bla bla")
     assert os.path.exists(file_path) == True
-    assert file_path in  w.get_log()
 
 def test_fixture_worker_download_online(worker_download_online1):
     w = worker_download_online1
@@ -57,7 +56,6 @@ def test_fixture_worker_download_online(worker_download_online1):
     w.download_product(downloaded_file_path, "bla bla")
     assert os.path.exists(downloaded_file_path) == True
     log = w.get_log()
-    assert downloaded_file_path in log
     assert "https://github.com/potatowagon/copinicoos" in log
 
 def setup_worker_manager(worker_manager, worker_list):
