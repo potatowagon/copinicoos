@@ -1,5 +1,7 @@
 [![Build Status](https://travis-ci.org/potatowagon/copinicoos.svg?branch=remove-dhusget)](https://travis-ci.org/potatowagon/copinicoos)
 
+[![codecov](https://codecov.io/gh/potatowagon/copinicoos/branch/remove-dhusget/graph/badge.svg)](https://codecov.io/gh/potatowagon/copinicoos)
+
 # Copinicoos
 <a href="https://scihub.copernicus.eu/dhus/#/home">Copernicus</a>-download manager. Downloads the results in a search query in parallel processes, for faster downloads. Manages polling for offline products.
 
