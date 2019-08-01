@@ -21,7 +21,8 @@ setup(
             "tox-travis>=0.12",
             "pytest>=4.6.2",
             "pytest-cov>=2.7.1",
-            "Pillow==6.1.0"
+            "pytest-timeout==1.3.3",
+            "Pillow>=5.0.0"
         ]
     },
     python_requires=">=3.0",
