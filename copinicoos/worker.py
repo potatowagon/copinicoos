@@ -47,7 +47,7 @@ class Worker(Resumable, Loggable):
         json_file = "res.json"
         try:
             cmd = "wget --no-check-certificate --user=" + self.username + " --password=" + self.password + " -O " + json_file + " " + query
-            subprocess.call(cmd)
+            subprocess.call(cmd, shell=True)
             res_json = json.load(open(json_file))
             total_results = int(res_json["feed"]["opensearch:totalResults"])
             if total_results <= 0:
@@ -67,7 +67,7 @@ class Worker(Resumable, Loggable):
         json_file = self.name + "_res.json"
         try:
             cmd = "wget --no-check-certificate --user=" + self.username + " --password=" + self.password + " -O " + json_file + " " + query
-            subprocess.call(cmd)
+            subprocess.call(cmd, shell=True)
             res_json = json.load(open(json_file))
             title = str(res_json["feed"]["entry"]["title"])
             product_uri = str(res_json["feed"]["entry"]["link"][0]["href"])
@@ -101,7 +101,7 @@ class Worker(Resumable, Loggable):
         try:
             cmd = "wget -O " + file_path + " --continue --user=" + self.username + " --password="+ self.password + " " + product_uri
             self.logger.info(Fore.YELLOW + cmd)
-            subprocess.call(cmd)
+            subprocess.call(cmd, shell=True)
         except Exception as e:
             raise
       
