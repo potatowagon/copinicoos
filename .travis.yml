@@ -10,8 +10,8 @@ python:
 install:
   - pip install tox-travis codecov
 
-script: tox
-
-after_success:
-  - codecov --flags "python_${TRAVIS_PYTHON_VERSION//[^[:alnum:]]/}"
+script: 
+  - tox
+  - codecov 
   - sleep 10  # Github build status would not be updated by "codecov" otherwise
+  
