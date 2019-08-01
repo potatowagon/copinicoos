@@ -10,10 +10,6 @@ def req_search_res_json(query):
 
         if query.startswith("'") and query.endswith("'"):
             query = query[1:len(query)-1]
-        
-        if not '\\"' in query:
-            if '"' in query:
-                query = query.replace('"', '\\"')
 
         query = 'https://scihub.copernicus.eu/dhus/search?q=' + query + '&format=json'
         return query
