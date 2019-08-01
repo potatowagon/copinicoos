@@ -1,5 +1,4 @@
 [![Build Status](https://travis-ci.org/potatowagon/copinicoos.svg?branch=remove-dhusget)](https://travis-ci.org/potatowagon/copinicoos)
-
 [![codecov](https://codecov.io/gh/potatowagon/copinicoos/branch/remove-dhusget/graph/badge.svg)](https://codecov.io/gh/potatowagon/copinicoos)
 
 # Copinicoos
