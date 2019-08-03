@@ -3,10 +3,12 @@ language: shell
 matrix:
   include:
     - name: "Python 3.7.1 on Xenial Linux"
-      language: python
+      language: python      # 'language: python' is ignored by travis :(
       python: 3.7           # this works for Linux but is ignored on macOS or Windows
       dist: xenial          # required for Python >= 3.7
       before_install:
+        - source ~/virtualenv/python3.7/bin/activate
+        - python --version
         - sudo apt-get install -y wget
     - name: "Python 3.7.2 on macOS"
       os: osx
@@ -25,7 +27,6 @@ matrix:
       env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
 
 install:
-  - pip3 install --upgrade pip
   - pip install tox-travis codecov
 
 script:
