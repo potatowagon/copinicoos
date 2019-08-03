@@ -1,8 +1,7 @@
-language: python
-
 matrix:
   include:
     - name: "Python 3.7.1 on Xenial Linux"
+      language: python
       python: 3.7           # this works for Linux but is ignored on macOS or Windows
       dist: xenial          # required for Python >= 3.7
       before_install:
