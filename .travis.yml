@@ -27,6 +27,5 @@ script:
 
 matrix:
   allow_failures:
-    - os: 
-      - windows
-      - osx
+    - os: windows
+    - os: osx
