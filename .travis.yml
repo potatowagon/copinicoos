@@ -1,6 +1,9 @@
 language: python
 
-dist: xenial
+os:
+  - windows
+  - osx
+  - linux
 
 sudo: required
 
@@ -21,3 +24,7 @@ script:
   - tox
   - codecov 
   - sleep 10  # Github build status would not be updated by "codecov" otherwise
+
+matrix:
+  allow_failures:
+    - os: linux
