@@ -25,7 +25,7 @@ class Loggable():
         # log file handler
         logger = logging.getLogger(self.name)
         logger.propagate = False
-        if not logger.hasHandlers():
+        if not logger.hasHandlers() or not os.path.exists(self.logfile_path):
             f = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
             fh = logging.FileHandler(self.logfile_path)
             fh.setFormatter(f)

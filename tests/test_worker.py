@@ -66,6 +66,7 @@ def setup_worker_manager(worker_manager, worker_list):
 @pytest.mark.timeout(300)
 def test_run_in_seperate_process_one_worker(worker_manager, worker_download_online1):
     wm = setup_worker_manager(worker_manager, [worker_download_online1])
+    assert os.path.exists(os.path.join(test_dir, "copinicoos_logs", worker_download_online1.name + ".log"))
     # download first 3 results
     wm.total_results = 3
     wm.run_workers()
@@ -79,6 +80,7 @@ def test_run_in_seperate_process_one_worker(worker_manager, worker_download_onli
 @pytest.mark.timeout(300)
 def test_run_in_seperate_process_one_worker_offline(worker_manager, worker_download_offline1):
     wm = setup_worker_manager(worker_manager, [worker_download_offline1])
+    
     # download first 3 results
     wm.total_results = 3
     wm.run_workers()
@@ -90,6 +92,7 @@ def test_run_in_seperate_process_one_worker_offline(worker_manager, worker_downl
     assert log.count("Product could be offline.") == download_attempts
     if "DEBUG" in log:
         assert "lock" in log 
+    assert os.path.exists(os.path.join(test_dir, "copinicoos_logs", worker_download_offline1.name + ".log"))
 
 def check_online_file_downloaded_correctly():
     for item in os.listdir(test_dir):
@@ -111,6 +114,8 @@ def check_online_file_downloaded_correctly():
 @pytest.mark.timeout(300)
 def test_run_in_seperate_process_two_workers_both_online(worker_manager, worker_download_online1, worker_download_online2):
     wm = setup_worker_manager(worker_manager, [worker_download_online1, worker_download_online2])
+    assert os.path.exists(os.path.join(test_dir, "copinicoos_logs", worker_download_online1.name + ".log"))
+    assert os.path.exists(os.path.join(test_dir, "copinicoos_logs", worker_download_online2.name + ".log"))
     # download first 3 results
     wm.total_results = 3
     wm.run_workers()
