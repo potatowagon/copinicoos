@@ -15,8 +15,8 @@ from conftest import test_data_dir, test_dir
         (150)
     ]
 )
-def test_query_product_uri_success(worker1, result_num):
-    title, product_uri = worker1.query_product_uri(result_num)
+def test_query_product_uri_success(standalone_worker1, result_num):
+    title, product_uri = standalone_worker1.query_product_uri(result_num)
     try:
         assert title.startswith("S") 
         assert product_uri.startswith('"https://scihub.copernicus.eu/dhus/odata/v1/Products(') 
@@ -25,9 +25,9 @@ def test_query_product_uri_success(worker1, result_num):
         print(title, product_uri)
         raise
 
-def test_download_began(worker1):
-    assert worker1.download_began(os.path.join(test_data_dir, "S1A_offline.zip")) == False
-    assert worker1.download_began(os.path.join(test_data_dir, "S1A_online.zip")) == True
+def test_download_began(standalone_worker1):
+    assert standalone_worker1.download_began(os.path.join(test_data_dir, "S1A_offline.zip")) == False
+    assert standalone_worker1.download_began(os.path.join(test_data_dir, "S1A_online.zip")) == True
 
 @pytest.mark.timeout(120)
 @pytest.mark.skip(reason="hitting too many online products")
@@ -36,22 +36,22 @@ def test_download_began(worker1):
         (random.randint(150,300))
     ]
 )
-def test_run_offline(worker1, result_num):
-    worker1.run(result_num)
-    log = worker1.get_log()
+def test_run_offline(standalone_worker1, result_num):
+    standalone_worker1.run(result_num)
+    log = standalone_worker1.get_log()
     assert "Product could be offline. Retrying after " in log
 
-def test_run_offline_mock(worker_download_offline1):
-    test_run_offline(worker_download_offline1, 0)
+def test_run_offline_mock(standalone_worker_download_offline1):
+    test_run_offline(standalone_worker_download_offline1, 0)
 
-def test_fixture_worker_download_offline(worker_download_offline1):
-    w = worker_download_offline1
+def test_fixture_worker_download_offline(standalone_worker_download_offline1):
+    w = standalone_worker_download_offline1
     file_path = os.path.join(w.download_location, "S1A_offline.zip")
     w.download_product(file_path, "bla bla")
     assert os.path.exists(file_path) == True
 
-def test_fixture_worker_download_online(worker_download_online1):
-    w = worker_download_online1
+def test_fixture_worker_download_online(standalone_worker_download_online1):
+    w = standalone_worker_download_online1
     downloaded_file_path = os.path.join(w.download_location, "S1A_online.zip")
     w.download_product(downloaded_file_path, "bla bla")
     assert os.path.exists(downloaded_file_path) == True

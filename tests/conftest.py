@@ -92,16 +92,15 @@ def cleanup():
             close_all_loggers()
             shutil.rmtree(os.path.join(test_dir, item))
 
-def init_worker_type(worker_class, creds, creds_index,  w_args):
+def init_worker_type(worker_class, creds, creds_index,  w_args, standalone=False):
     w = getattr(sys.modules[__name__], worker_class)(creds["u" + creds_index], creds["p" + creds_index])
     w.register_settings(w_args.query, w_args.download_location, w_args.polling_interval, w_args.offline_retries)
-    logdir = os.path.join(test_dir, w.name + "_logs")
-    if not os.path.exists(logdir):
-        os.mkdir(logdir)
-    w.setup(logdir)
+    if standalone:
+        logdir = os.path.join(test_dir, w.name + "_logs")
+        if not os.path.exists(logdir):
+            os.mkdir(logdir)
+        w.setup(logdir)
     return w
-
-###### Workers capable of running in stand alone mode 
 
 @pytest.fixture()
 def worker1(creds, w_args):
@@ -128,6 +127,33 @@ def worker_download_online2(creds, w_args):
 @pytest.fixture()
 def worker_download_offline2(creds, w_args):
     return init_worker_type("MockWokerProductOffline", creds, "2", w_args)
+
+###### Workers capable of running in stand alone mode 
+@pytest.fixture()
+def standalone_worker1(creds, w_args):
+    w = init_worker_type("Worker", creds, "1", w_args, standalone=True)
+    return w
+
+@pytest.fixture()
+def standalone_worker2(creds, w_args):
+    w = init_worker_type("Worker", creds, "2", w_args, standalone=True)
+    return w
+
+@pytest.fixture()
+def standalone_worker_download_offline1(creds, w_args):
+    return init_worker_type("MockWokerProductOffline", creds, "1", w_args, standalone=True)
+    
+@pytest.fixture()
+def standalone_worker_download_online1(creds, w_args):
+    return init_worker_type("MockWokerProductOnline", creds, "1", w_args, standalone=True)
+
+@pytest.fixture()
+def standalone_worker_download_online2(creds, w_args):
+    return init_worker_type("MockWokerProductOnline", creds, "2", w_args, standalone=True)
+
+@pytest.fixture()
+def standalone_worker_download_offline2(creds, w_args):
+    return init_worker_type("MockWokerProductOffline", creds, "2", w_args, standalone=True)
             
 class MockWokerProductOffline(Worker):
     def download_product(self, file_path, product_uri):
