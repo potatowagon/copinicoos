@@ -1,3 +1,5 @@
+language: python
+
 matrix:
   include:
     - name: "Python 3.7.1 on Xenial Linux"
