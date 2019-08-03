@@ -45,6 +45,9 @@ matrix:
         - pytest -sv -m "not e2e" --cov=copinicoos
         - codecov 
         - sleep 10  # Github build status would not be updated by "codecov" otherwise
+  allow_failures:
+    - os: windows
+    - os: osx
 
 install: 
   - pip3 install --upgrade pip  # all three OSes agree about 'pip3'
