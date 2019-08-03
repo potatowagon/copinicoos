@@ -22,10 +22,12 @@ log_dir = os.path.join(test_dir, "copinicoos_logs")
 
 def close_all_loggers():
     loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
+    print(loggers)
     for logger in loggers:
         for handler in logger.handlers:
             if isinstance(handler, logging.FileHandler):
                 handler.close()
+        logger.handlers = []
 
 @pytest.fixture(scope="session")
 def creds():
@@ -85,11 +87,11 @@ def worker_manager(worker_list_1_worker, wm_args):
 @pytest.fixture(autouse=True)
 def cleanup():
     yield
+    close_all_loggers()
     for item in os.listdir(test_dir):
         if item.startswith("S") and item.endswith(".zip"):
             os.remove(os.path.join(test_dir, item))
         if "_logs" in item:
-            close_all_loggers()
             shutil.rmtree(os.path.join(test_dir, item))
 
 def init_worker_type(worker_class, creds, creds_index,  w_args, standalone=False):
