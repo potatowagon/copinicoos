@@ -1,7 +1,7 @@
 language: python            # this works for Linux but is an error on macOS or Windows
 matrix:
   include:
-    - name: "Python 3.7.1 on Xenial Linux"
+    - name: "Python 3.7 on Xenial Linux"
       python: 3.7           # this works for Linux but is ignored on macOS or Windows
       dist: xenial          # required for Python >= 3.7
       script:
@@ -12,11 +12,10 @@ matrix:
         - tox
         - codecov 
         - sleep 10  # Github build status would not be updated by "codecov" otherwise
-    - name: "Python 3.7.2 on macOS"
+    - name: "Python 3.7 on macOS"
       os: osx
       osx_image: xcode10.2  # Python 3.7.2 running on macOS 10.14.3
       language: shell       # 'language: python' is an error on Travis CI macOS
-      # python: 3.7         # 'python:' is ignored on Travis CI macOS
       before_install: python3 --version ; pip3 --version ; sw_vers
       script:
         - test_data_dir=/tests/test_data/
@@ -27,10 +26,9 @@ matrix:
         - pytest -sv -m "not e2e" --cov=copinicoos
         - codecov 
         - sleep 10  # Github build status would not be updated by "codecov" otherwise  
-    - name: "Python 3.7.3 on Windows"
+    - name: "Python 3.7 on Windows"
       os: windows           # Windows 10.0.17134 N/A Build 17134
       language: shell       # 'language: python' is an error on Travis CI Windows
-      # python: 3.7         # 'python:' is ignored on Travis CI Windows
       before_install:
         - choco install wget
         - choco install python  # this install takes at least 1 min 30 sec
@@ -45,13 +43,7 @@ matrix:
         - pytest -sv -m "not e2e" --cov=copinicoos
         - codecov 
         - sleep 10  # Github build status would not be updated by "codecov" otherwise
-  allow_failures:
-    - os: windows
-    - os: osx
-
+  
 install: 
   - pip3 install --upgrade pip  # all three OSes agree about 'pip3'
   - pip install tox-travis codecov
-
-notifications:
-  email: false
