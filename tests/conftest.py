@@ -23,7 +23,6 @@ log_dir = os.path.join(test_dir, "copinicoos_logs")
 
 def close_all_loggers():
     loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
-    print(loggers)
     for logger in loggers:
         for handler in logger.handlers:
             if isinstance(handler, logging.FileHandler):
