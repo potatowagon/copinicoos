@@ -21,6 +21,10 @@ test_dir = os.path.dirname(os.path.realpath(__file__))
 test_data_dir = os.path.join(test_dir, "test_data")
 log_dir = os.path.join(test_dir, "copinicoos_logs")
 
+query_txt_path = os.path.join(test_data_dir, "query.txt")
+secrets1_json_path = os.path.join(test_data_dir, "secrets1.json")
+secrets2_json_path = os.path.join(test_data_dir, "secrets2.json")
+
 def close_all_loggers():
     loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
     for logger in loggers:
@@ -31,7 +35,7 @@ def close_all_loggers():
 
 @pytest.fixture(scope="session")
 def creds():
-    return json.load(open(os.path.join(test_data_dir, "secrets2.json")))
+    return json.load(secrets2_json_path)
 
 @pytest.fixture(scope="session")
 def worker_list_2_workers(creds):
