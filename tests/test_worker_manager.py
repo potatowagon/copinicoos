@@ -5,8 +5,8 @@ import pytest
 
 from copinicoos import WorkerManager
 
-def test_init_from_args(worker_list_1_worker, wm_args):
-    wm = WorkerManager.init_from_args(worker_list_1_worker, wm_args)
+def test_init_from_args(worker_list_2_workers, wm_args):
+    wm = WorkerManager.init_from_args(worker_list_2_workers, wm_args)
     assert type(wm).__name__ == "WorkerManager"
 
 def test_setup_workdir(worker_manager):

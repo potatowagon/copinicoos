@@ -7,62 +7,34 @@ from colorama import Fore
 
 from .worker import Worker
 from . import query_formatter
+from .account_manager import AccountManager
 
 class InputManager():
+    '''This class is repsonsible for collecting input from user and parsing it as auguments for WorkerManager to consume'''
     def __init__(self):
         self.args = Args()
-        self.worker_list = []
+        self.account_manager = AccountManager()
         self.args.download_location = os.getcwd()
         self.args.polling_interval = 6
         self.args.offline_retries = 2
 
-    @staticmethod
-    def is_worker_auth_valid(username, password):
-        '''
-        Send sample query to check worker auth
-        returns: True if valid
-        '''
-        print("Authenticationg worker...")
-        json_file = "res.json"
-        sample_query = "https://scihub.copernicus.eu/dhus/search?q=*&rows=1&format=json"
-        try:
-            cmd = ["wget", "--no-check-certificate", "--user=" + username, "--password=" + password, "-O", json_file, sample_query]
-            subprocess.call(cmd)
-            res_json = json.load(open(json_file))
-            if res_json["feed"] is not None:
-                os.remove(json_file)
-                return True
-        except Exception as e:
-            print(e)
-            return False
-
-    def is_unique_worker_cred(self, username, password):
-        '''
-        Check if username and password have already been used to initialise a worker
-        returns: True if unused 
-        '''
-        for worker in self.worker_list:
-            if username == worker.username:
-                return False
-        return True
-
     def interactive_input(self):
-        self._get_worker_input_i()
+        self._get_account_input_i()
         self._get_query_input_i()
         self._get_download_location_input_i()
         self._get_polling_interval_input_i()
         self._get_offline_retries_input_i()
     
-    def _get_worker_input_i(self):
-        print(Fore.YELLOW + "Enter number of workers: ")
-        total_workers = int(input())
+    def _get_account_input_i(self):
+        print(Fore.YELLOW + "Enter number of accounts: ")
+        total_accounts = int(input())
         i = 1
-        while i <= total_workers:
+        while i <= total_accounts:
             print(Fore.YELLOW + "Enter username of worker " + str(i))
             username = input()
             print(Fore.YELLOW + "Enter password of worker " + str(i))
             password = input()
-            if self.add_worker(username, password):
+            if self.account_manager.add_two_workers_per_account(username, password):
                 i += 1
                 
     def _get_query_input_i(self):
@@ -103,21 +75,18 @@ class InputManager():
             print("Using default offline retries.")
 
     def return_worker_list(self):
+        '''Uses account manager to check that there is at list one worker initialised before returning worker_list
+        
+        Returns: 
+            worker_list if check passed
         '''
-        Checks that there is at list one worker initialised before returning worker_list
-        returns: worker_list if check passed
-        '''
-        try:
-            int(len(self.worker_list))
-            return self.worker_list
-        except Exception as e:
-            print(e)
-            print(Fore.RED + "Error in returning workers. No workers initialised.")
+        return self.account_manager.return_worker_list()
     
     def return_args(self):
-        '''
-        Checks that all required args have been initialised
-        return: Args if check passed
+        '''Checks that all required args have been initialised
+        
+        Returns: 
+            arguments (Args): Args object if check pass
         '''
         try:
             for arg in Args().__dict__:
@@ -141,7 +110,7 @@ class InputManager():
             args = parser.parse_args(test_args)
         if args != None:
             json_creds = self.get_json_creds(args.credentials)
-            self.add_workers_from_json_creds(json_creds)
+            self.account_manager.add_workers_from_json_creds(json_creds)
             self.get_total_results_from_query(args.query)
             self.args.query = query_formatter.req_search_res_json(args.query)
             self.args.download_location = args.download_location
@@ -156,34 +125,6 @@ class InputManager():
         arg = arg.replace(' ', '')
         return json.loads(arg)
 
-    def add_workers_from_json_creds(self, json_creds):
-        for k in json_creds:
-            if k.startswith("u"):
-                username = json_creds[k]
-                try:
-                    password = json_creds["p" + k[1:]]
-                except Exception as e:
-                    print(e)
-                    print(Fore.RED + "Password not set for " + username)
-                if not self.add_worker(username, password):
-                    raise Exception("Failed to add worker for username: " + username)
-
-    def add_worker(self, username, password):
-        ''' Creates and adds a Worker to worker list.
-        returns True if successful, else returns False
-        '''
-        if not InputManager().is_worker_auth_valid(username, password):
-            print(Fore.RED + "Authentication failed, please try again.")
-            return False
-    
-        if self.is_unique_worker_cred(username, password):
-            self.worker_list.append(Worker(username, password))
-            print(Fore.GREEN + "Worker sucessfully authenticated.")
-            return True
-        else:
-            print(Fore.RED + "Credentials already used. Please try again.")
-            return False
-
     def get_total_results_from_query(self, query):
         query = query_formatter.req_search_res_json(query)
         print("\nSending query: " + query + "\n")
@@ -195,9 +136,7 @@ class InputManager():
         return self.args.total_results
 
 class Args():
-    '''
-    Required args interface
-    '''
+    '''Required args interface'''
     def __init__(self):
         self.query = None
         self.total_results = None

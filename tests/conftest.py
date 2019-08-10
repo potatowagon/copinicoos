@@ -14,7 +14,8 @@ import pytest
 from copinicoos import InputManager
 from copinicoos.input_manager import Args 
 from copinicoos import WorkerManager
-from copinicoos.worker import Worker
+from copinicoos import Worker
+from copinicoos import AccountManager
 
 test_dir = os.path.dirname(os.path.realpath(__file__))
 test_data_dir = os.path.join(test_dir, "test_data")
@@ -22,7 +23,6 @@ log_dir = os.path.join(test_dir, "copinicoos_logs")
 
 def close_all_loggers():
     loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
-    print(loggers)
     for logger in loggers:
         for handler in logger.handlers:
             if isinstance(handler, logging.FileHandler):
@@ -34,18 +34,18 @@ def creds():
     return json.load(open(os.path.join(test_data_dir, "secrets2.json")))
 
 @pytest.fixture(scope="session")
-def worker_list_1_worker(creds):
+def worker_list_2_workers(creds):
     """
     Basic worker for querying total results only
     """
-    im = InputManager()
-    im.add_worker(creds["u1"], creds["p1"])
-    return im.worker_list
+    am = AccountManager()
+    am.add_two_workers_per_account(creds["u1"], creds["p1"])
+    return am.return_worker_list()
 
-@pytest.fixture()
-def input_manager_with_one_worker(worker_list_1_worker):
+@pytest.fixture(scope="session")
+def input_manager_with_2_workers(creds):
     im = InputManager()
-    im.worker_list = worker_list_1_worker
+    im.account_manager.add_two_workers_per_account(creds["u1"], creds["p1"])
     return im
 
 @pytest.fixture(scope="session")
@@ -81,8 +81,8 @@ def wm_args(formatted_query):
     return args
 
 @pytest.fixture()
-def worker_manager(worker_list_1_worker, wm_args):
-    return WorkerManager.init_from_args(worker_list_1_worker, wm_args)
+def worker_manager(worker_list_2_workers, wm_args):
+    return WorkerManager.init_from_args(worker_list_2_workers, wm_args)
 
 @pytest.fixture(autouse=True)
 def cleanup():
@@ -95,7 +95,7 @@ def cleanup():
             shutil.rmtree(os.path.join(test_dir, item))
 
 def init_worker_type(worker_class, creds, creds_index,  w_args, standalone=False):
-    w = getattr(sys.modules[__name__], worker_class)(creds["u" + creds_index], creds["p" + creds_index])
+    w = getattr(sys.modules[__name__], worker_class)(creds["u" + creds_index], creds["u" + creds_index], creds["p" + creds_index])
     w.register_settings(w_args.query, w_args.download_location, w_args.polling_interval, w_args.offline_retries)
     if standalone:
         logdir = os.path.join(test_dir, w.name + "_logs")
