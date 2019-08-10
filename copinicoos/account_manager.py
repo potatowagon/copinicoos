@@ -21,7 +21,7 @@ class AccountManager():
         Returns: 
             True if valid
         '''
-        print("Authenticationg worker...")
+        print("Authenticating worker...")
         json_file = "res.json"
         sample_query = "https://scihub.copernicus.eu/dhus/search?q=*&rows=1&format=json"
         try:
