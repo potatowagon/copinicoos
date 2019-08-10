@@ -30,9 +30,9 @@ class InputManager():
         total_accounts = int(input())
         i = 1
         while i <= total_accounts:
-            print(Fore.YELLOW + "Enter username of worker " + str(i))
+            print(Fore.YELLOW + "Enter username of account " + str(i))
             username = input()
-            print(Fore.YELLOW + "Enter password of worker " + str(i))
+            print(Fore.YELLOW + "Enter password of account " + str(i))
             password = input()
             if self.account_manager.add_two_workers_per_account(username, password):
                 i += 1
