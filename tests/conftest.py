@@ -35,7 +35,7 @@ def close_all_loggers():
 
 @pytest.fixture(scope="session")
 def creds():
-    return json.load(secrets2_json_path)
+    return json.load(open(secrets2_json_path))
 
 @pytest.fixture(scope="session")
 def worker_list_2_workers(creds):
