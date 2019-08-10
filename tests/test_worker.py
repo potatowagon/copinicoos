@@ -19,8 +19,8 @@ def test_query_product_uri_success(standalone_worker1, result_num):
     title, product_uri = standalone_worker1.query_product_uri(result_num)
     try:
         assert title.startswith("S") 
-        assert product_uri.startswith('"https://scihub.copernicus.eu/dhus/odata/v1/Products(') 
-        assert product_uri.endswith('/$value"') 
+        assert product_uri.startswith('https://scihub.copernicus.eu/dhus/odata/v1/Products(') 
+        assert product_uri.endswith('/$value') 
     except Exception as e:
         print(title, product_uri)
         raise
