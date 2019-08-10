@@ -16,12 +16,12 @@ from .loggable import Loggable
 class Worker(Resumable, Loggable):
     request_lock = Lock()
 
-    def __init__(self, username, password):
+    def __init__(self, worker_name, username, password):
         Resumable.__init__(self)
         Loggable.__init__(self)
         self.username = username
         self.password = password
-        self.name = username
+        self.name = worker_name
         self.workdir = None
         self.query = None
         self.download_location = None
@@ -29,9 +29,6 @@ class Worker(Resumable, Loggable):
         self.offline_retries = None
         self.logger = None
         self.return_msg = None 
-    
-    def set_name(self, name):
-        self.name = name
 
     def setup(self, workdir):
         self.workdir = workdir
