@@ -68,15 +68,10 @@ class Worker(Resumable, Loggable):
             res_json = json.load(open(json_file))
             title = str(res_json["feed"]["entry"]["title"])
             product_uri = str(res_json["feed"]["entry"]["link"][0]["href"])
-            product_uri = self.format_product_uri(product_uri)
             os.remove(json_file)
             return title, product_uri
         except Exception as e:
             raise
-
-    def format_product_uri(self, product_uri):
-        product_uri = '"' + product_uri + '"'
-        return product_uri
     
     def query_product_uri_with_retries(self, result_number, max_retries=3):
         title = None
@@ -97,7 +92,7 @@ class Worker(Resumable, Loggable):
     def download_product(self, file_path, product_uri):
         try:
             cmd = ["wget", "-O", file_path, "--continue", "--user=" + self.username, "--password=" + self.password, product_uri]
-            self.logger.info(Fore.YELLOW + cmd)
+            self.logger.info(Fore.YELLOW + " ".join(cmd))
             subprocess.call(cmd)
         except Exception as e:
             raise
