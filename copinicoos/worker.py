@@ -6,6 +6,7 @@ from multiprocessing import Lock
 from threading import Thread
 import logging 
 import sys
+import re
 
 import colorama
 from colorama import Fore
@@ -96,7 +97,25 @@ class Worker(Resumable, Loggable):
             subprocess.call(cmd)
         except Exception as e:
             raise
-      
+
+    def query_product_size(self, product_uri):
+        ''' Query the file size of product
+        Args:
+            product uri (str): eg. https://scihub.copernicus.eu/dhus/odata/v1/Products('23759763-91e8-4336-a50a-a143e14c8d69')/$value
+        Returns:
+            product file size in bytes (int) or None if product_uri query failed
+        '''
+        try:
+            cmd = ["wget", "--spider", "--user=" + self.username, "--password=" + self.password, product_uri]
+            out = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+            m = re.search(r'(?<=Length: )\d+', str(out))
+            length = int(m.group(0))
+            return length
+        except Exception as e:
+            self.logger.error(e)
+            self.logger.error("Error in querying product size.")
+            return None
+
     def download_began(self, file_path):
         try:
             b = os.path.getsize(file_path)

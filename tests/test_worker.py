@@ -115,5 +115,15 @@ def test_run_in_seperate_process_two_workers_both_online(worker_manager, worker_
 
     assert wm.get_log().count("SUCCESS") == wm.total_results
 
+@pytest.mark.parametrize(
+    "sample_product_uri, expected_length_in_bytes", [
+        ("https://scihub.copernicus.eu/dhus/odata/v1/Products(\'23759763-91e8-4336-a50a-a143e14c8d69\')/$value", 993398956),
+        ("https://scihub.copernicus.eu/dhus/odata/v1/Products(\'05d5daa5-c1aa-4ad6-a600-d39e9a692db5\')/$value", 1049855358),
+        ("https://blabla", None),
+    ]
+)
+def test_query_product_size(sample_product_uri, expected_length_in_bytes, standalone_worker1):
+    assert standalone_worker1.query_product_size(sample_product_uri) == expected_length_in_bytes
+
 
 
