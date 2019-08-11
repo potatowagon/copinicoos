@@ -8,8 +8,10 @@ import logging
 import sys
 import subprocess
 import time
+from zipfile import ZipFile
 
 import pytest
+from PIL import Image
 
 from copinicoos import InputManager
 from copinicoos.input_manager import Args 
@@ -98,8 +100,10 @@ def cleanup():
         if "_logs" in item:
             shutil.rmtree(os.path.join(test_dir, item))
 
-def init_worker_type(worker_class, creds, creds_index,  w_args, standalone=False):
-    w = getattr(sys.modules[__name__], worker_class)(creds["u" + creds_index], creds["u" + creds_index], creds["p" + creds_index])
+def init_worker_type(worker_class, creds, creds_index,  w_args, worker_name=None, standalone=False):
+    if worker_name == None:
+        worker_name = creds["u" + creds_index]
+    w = getattr(sys.modules[__name__], worker_class)(worker_name, creds["u" + creds_index], creds["p" + creds_index])
     w.register_settings(w_args.query, w_args.download_location, w_args.polling_interval, w_args.offline_retries)
     if standalone:
         logdir = os.path.join(test_dir, w.name + "_logs")
@@ -180,3 +184,28 @@ class MockWokerProductOnline(Worker):
             subprocess.call(cmd)
         except Exception as e:
             raise
+
+def check_online_file_downloaded_correctly():
+    '''Fail test case if mock online file cannot be opened
+    
+    Returns:
+        count (int): number of mock online files downloaded if all downloaded correctly 
+    '''
+    count = 0
+    for item in os.listdir(test_dir):
+        if item.startswith("S") and item.endswith(".zip"):
+            count += 1
+            mock_product = ZipFile(os.path.join(test_dir, item))
+            with mock_product.open("S1A_online/tiny_file.txt") as txt_file:
+                txt = str(txt_file.read())
+                assert "this is just to occupy disk space." in txt
+                txt_file.close()
+
+            with mock_product.open('S1A_online/fatter_file.png') as img_file:
+                try:
+                    img = Image.open(img_file)
+                    img.verify()
+                    img_file.close()
+                except Exception as e:
+                    pytest.fail(e)
+    return count
