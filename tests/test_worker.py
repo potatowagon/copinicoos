@@ -1,12 +1,10 @@
 import os
 import random
 import re
-from zipfile import ZipFile
 
 import pytest
-from PIL import Image
 
-from conftest import test_data_dir, test_dir
+from conftest import test_data_dir, test_dir, check_online_file_downloaded_correctly
 
 @pytest.mark.parametrize(
     "result_num", [
@@ -92,23 +90,6 @@ def test_run_in_seperate_process_one_worker_offline(worker_manager, worker_downl
     assert log.count("Product could be offline.") == download_attempts
     if "DEBUG" in log:
         assert "lock" in log 
-    
-def check_online_file_downloaded_correctly():
-    for item in os.listdir(test_dir):
-        if item.startswith("S") and item.endswith(".zip"):
-            mock_product = ZipFile(os.path.join(test_dir, item))
-            with mock_product.open("S1A_online/tiny_file.txt") as txt_file:
-                txt = str(txt_file.read())
-                assert "this is just to occupy disk space." in txt
-                txt_file.close()
-
-            with mock_product.open('S1A_online/fatter_file.png') as img_file:
-                try:
-                    img = Image.open(img_file)
-                    img.verify()
-                    img_file.close()
-                except Exception as e:
-                    pytest.fail(e)
             
 @pytest.mark.timeout(300)
 def test_run_in_seperate_process_two_workers_both_online(worker_manager, worker_download_online1, worker_download_online2):
