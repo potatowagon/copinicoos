@@ -113,8 +113,15 @@ class Worker(Resumable, Loggable):
             return length
         except Exception as e:
             self.logger.error(e)
-            self.logger.error("Error in querying product size.")
+            self.logger.error("Error in querying product size for " + product_uri)
             return None
+
+    def get_downloaded_product_size(self, file_path):
+        try:
+            b = os.path.getsize(file_path)
+            return int(b)
+        except Exception as e:
+            self.logger.error(e)
 
     def download_began(self, file_path):
         try:
