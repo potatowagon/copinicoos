@@ -124,17 +124,6 @@ class Worker(Resumable, Loggable):
         except Exception as e:
             self.logger.error(e)
 
-    def download_began(self, file_path):
-        try:
-            b = os.path.getsize(file_path)
-        except Exception as e:
-            self.logger.error(e)
-            return False
-        if b > 0:
-            return True
-        else:
-            return False
-
     def _hold_lock(self):
         self.logger = self._setup_logger(self.name, self.workdir)
         self.logger.debug(self.name + " has the lock. Ready to send requests...")

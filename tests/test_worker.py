@@ -23,10 +23,6 @@ def test_query_product_uri_success(standalone_worker1, result_num):
         print(title, product_uri)
         raise
 
-def test_download_began(standalone_worker1):
-    assert standalone_worker1.download_began(os.path.join(test_data_dir, "S1A_offline.zip")) == False
-    assert standalone_worker1.download_began(os.path.join(test_data_dir, "S1A_online.zip")) == True
-
 @pytest.mark.timeout(120)
 @pytest.mark.skip(reason="hitting too many online products")
 @pytest.mark.parametrize(
