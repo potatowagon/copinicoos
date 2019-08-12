@@ -9,6 +9,7 @@ import sys
 import subprocess
 import time
 from zipfile import ZipFile
+import re
 
 import pytest
 from PIL import Image
@@ -166,6 +167,25 @@ def standalone_worker_download_offline2(creds, w_args):
     return init_worker_type("MockWokerProductOffline", creds, "2", w_args, standalone=True)
             
 class MockWokerProductOffline(Worker):
+    def query_product_size(self, product_uri):
+        ''' Always query the file size of mock offline product
+        Args:
+            product uri (str): eg. https://scihub.copernicus.eu/dhus/odata/v1/Products('23759763-91e8-4336-a50a-a143e14c8d69')/$value
+        Returns:
+            product file size in bytes (int) or None if product_uri query failed
+        '''
+        product_uri = "https://github.com/potatowagon/copinicoos/blob/remove-dhusget/tests/test_data/S1A_offline.zip?raw=true"
+        try:
+            cmd = ["wget", "--spider", "--user=" + self.username, "--password=" + self.password, product_uri]
+            out = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+            m = re.search(r'(?<=Length: )\d+', str(out))
+            length = int(m.group(0))
+            return length
+        except Exception as e:
+            self.logger.error(e)
+            self.logger.error("Error in querying product size for " + product_uri)
+            return None
+
     def download_product(self, file_path, product_uri):
         try:
             product_uri =  "https://github.com/potatowagon/copinicoos/blob/remove-dhusget/tests/test_data/S1A_offline.zip?raw=true"
@@ -176,6 +196,25 @@ class MockWokerProductOffline(Worker):
             raise
 
 class MockWokerProductOnline(Worker):
+    def query_product_size(self, product_uri):
+        ''' Always query the file size of mock online product
+        Args:
+            product uri (str): eg. https://scihub.copernicus.eu/dhus/odata/v1/Products('23759763-91e8-4336-a50a-a143e14c8d69')/$value
+        Returns:
+            product file size in bytes (int) or None if product_uri query failed
+        '''
+        product_uri = "https://github.com/potatowagon/copinicoos/blob/remove-dhusget/tests/test_data/S1A_online.zip?raw=true"
+        try:
+            cmd = ["wget", "--spider", "--user=" + self.username, "--password=" + self.password, product_uri]
+            out = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+            m = re.search(r'(?<=Length: )\d+', str(out))
+            length = int(m.group(0))
+            return length
+        except Exception as e:
+            self.logger.error(e)
+            self.logger.error("Error in querying product size for " + product_uri)
+            return None
+
     def download_product(self, file_path, product_uri):
         try:
             product_uri =  "https://github.com/potatowagon/copinicoos/blob/remove-dhusget/tests/test_data/S1A_online.zip?raw=true"

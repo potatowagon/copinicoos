@@ -6,6 +6,7 @@ from multiprocessing import Lock
 from threading import Thread
 import logging 
 import sys
+import re
 
 import colorama
 from colorama import Fore
@@ -96,7 +97,32 @@ class Worker(Resumable, Loggable):
             subprocess.call(cmd)
         except Exception as e:
             raise
-      
+
+    def query_product_size(self, product_uri):
+        ''' Query the file size of product
+        Args:
+            product uri (str): eg. https://scihub.copernicus.eu/dhus/odata/v1/Products('23759763-91e8-4336-a50a-a143e14c8d69')/$value
+        Returns:
+            product file size in bytes (int) or None if product_uri query failed
+        '''
+        try:
+            cmd = ["wget", "--spider", "--user=" + self.username, "--password=" + self.password, product_uri]
+            out = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+            m = re.search(r'(?<=Length: )\d+', str(out))
+            length = int(m.group(0))
+            return length
+        except Exception as e:
+            self.logger.error(e)
+            self.logger.error("Error in querying product size for " + product_uri)
+            return None
+
+    def get_downloaded_product_size(self, file_path):
+        try:
+            b = os.path.getsize(file_path)
+            return int(b)
+        except Exception as e:
+            self.logger.error(e)
+
     def download_began(self, file_path):
         try:
             b = os.path.getsize(file_path)
@@ -132,33 +158,26 @@ class Worker(Resumable, Loggable):
         status = None
         title, product_uri = self.query_product_uri_with_retries(result_num)
         file_path = os.path.join(self.download_location, title + ".zip")
-        self._prepare_to_request()
-        self.logger.info(Fore.GREEN + "Begin downloading\n" + title + "\nat\n" + product_uri + "\n")
-        self.download_product(file_path, product_uri)
-        if not self.download_began(file_path):
-            self.logger.warning(Fore.YELLOW + "Product could be offline. Retrying after " + str(self.polling_interval) + " seconds.")
-            for i in range(1, self.offline_retries + 1):
+        complete_product_size = self.query_product_size(product_uri)
+        max_attempts = self.offline_retries + 1
+        for attempt in range(1, self.offline_retries + 2):
+            self.logger.info("Download attempt number " + str(attempt) + " of " + str(max_attempts))
+            self._prepare_to_request()
+            self.logger.info(Fore.GREEN + "Begin downloading\n" + title + "\nat\n" + product_uri + "\n")
+            self.download_product(file_path, product_uri)
+            product_size = self.get_downloaded_product_size(file_path)
+            if product_size == 0:
+                self.logger.warning(Fore.YELLOW + "Product could be offline. Retrying after " + str(self.polling_interval) + " seconds.")
+                status = "OFFLINE"
                 time.sleep(self.polling_interval)
-                self._prepare_to_request()
-                self.logger.info(Fore.GREEN + "Retry attempt " + str(i) + " of " + str(self.offline_retries))
-                self.logger.info(Fore.GREEN + "Begin downloading\n" + title + "\nat\n" + product_uri + "\n")
-                self.download_product(file_path, product_uri)
-                if self.download_began(file_path):
-                    self.logger.info(Fore.GREEN + "Downloaded product " + title)
-                    status = "SUCCESS"
-                    break
-                else:
-                    if i < self.offline_retries:
-                        self.logger.info(Fore.YELLOW + "Product could be offline. Retrying after " + str(self.polling_interval) + " seconds.")
-            if i == self.offline_retries:
-                self.logger.info(Fore.YELLOW + "Product could be offline.")
-                self.logger.info(Fore.RED + "Failed to download " + title + ". Moving on to next product.")
+            elif product_size < complete_product_size:
+                self.logger.warning(Fore.YELLOW + "There was a break in connection.")
                 status = "FAILED"
-        else:
-            self.logger.info(Fore.GREEN + "Downloaded product " + title)
-            status = "SUCCESS"
+            else:
+                self.logger.info(Fore.GREEN + "Downloaded product " + title)
+                status = "SUCCESS"
+                break
         return self.name + " " + title + " " + status
-        
 
     def run_in_seperate_process(self, result_num, ready_worker_queue):
         # Setting up logger again because logger is shallow copied to new process and looses setup
