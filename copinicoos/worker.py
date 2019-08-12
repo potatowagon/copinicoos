@@ -7,6 +7,7 @@ from threading import Thread
 import logging 
 import sys
 import re
+import zipfile
 
 import colorama
 from colorama import Fore
@@ -154,6 +155,17 @@ class Worker(Resumable, Loggable):
         self.polling_interval = polling_interval
         self.offline_retries = offline_retries
 
+    def _is_bad_zipfile(self, file_path):
+        try:
+            with zipfile.ZipFile(file_path) as zf:
+                zf.close()
+            return False
+        except zipfile.BadZipFile as e:
+            self.logger.error(file_path + " could not be opened.")
+            return True
+        except Exception as e:
+            self.logger.error(e)            
+
     def run(self, result_num, uri_query_max_retries=3):
         status = None
         title, product_uri = self.query_product_uri_with_retries(result_num)
@@ -174,8 +186,12 @@ class Worker(Resumable, Loggable):
                 self.logger.warning(Fore.YELLOW + "There was a break in connection.")
                 status = "FAILED"
             else:
-                self.logger.info(Fore.GREEN + "Downloaded product " + title)
-                status = "SUCCESS"
+                if self._is_bad_zipfile(file_path):
+                    self.logger.error("Product download failed.")
+                    status = "FAILED"
+                else:
+                    self.logger.info(Fore.GREEN + "Downloaded product " + title)
+                    status = "SUCCESS"
                 break
         return self.name + " " + title + " " + status
 
