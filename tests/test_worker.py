@@ -91,6 +91,23 @@ def test_run_in_seperate_process_one_worker_offline(worker_manager, worker_downl
     assert log.count("Product could be offline.") == download_attempts
     if "DEBUG" in log:
         assert "lock" in log 
+
+@pytest.mark.timeout(300)
+def test_run_in_seperate_process_one_worker_online_incomplete(worker_manager, worker_download_incomplete1):
+    wm = setup_worker_manager(worker_manager, [worker_download_incomplete1])
+    assert os.path.exists(os.path.join(test_dir, "copinicoos_logs", worker_download_incomplete1.name + ".log"))
+    # download first 3 results
+    wm.total_results = 3
+    wm.run_workers()
+    log = worker_download_incomplete1.get_log()
+    total_retries = wm.total_results * worker_download_incomplete1.offline_retries
+    download_attempts = total_retries + wm.total_results
+    assert log.count("Begin downloading") == download_attempts
+    assert log.count("There was a break in connection.") == download_attempts
+    if "DEBUG" in log:
+        assert "lock" in log 
+    wm_log = wm.get_log()
+    assert wm_log.count("FAILED") == wm.total_results
             
 @pytest.mark.timeout(300)
 def test_run_in_seperate_process_two_workers_both_online(worker_manager, worker_download_online1, worker_download_online2):
@@ -136,6 +153,3 @@ def test_query_product_size(sample_product_uri, expected_length_in_bytes, standa
 )
 def test_get_downloaded_product_size(file_path, expected_length_in_bytes, standalone_worker1):
     assert standalone_worker1.get_downloaded_product_size(file_path) == expected_length_in_bytes
-
-
-

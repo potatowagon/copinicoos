@@ -139,6 +139,10 @@ def worker_download_online2(creds, w_args):
 def worker_download_offline2(creds, w_args):
     return init_worker_type("MockWokerProductOffline", creds, "2", w_args)
 
+@pytest.fixture()
+def worker_download_incomplete1(creds, w_args):
+    return init_worker_type("MockWokerIncompleteProductOnline", creds, "1", w_args)
+
 ###### Workers capable of running in stand alone mode 
 @pytest.fixture()
 def standalone_worker1(creds, w_args):
@@ -214,6 +218,11 @@ class MockWokerProductOnline(Worker):
             self.logger.error(e)
             self.logger.error("Error in querying product size for " + product_uri)
             return None
+
+class MockWokerIncompleteProductOnline(Worker):
+    def query_product_size(self, product_uri):
+        '''Returns some incredibly large mock file size'''
+        return 9999999999999999
 
     def download_product(self, file_path, product_uri):
         try:
