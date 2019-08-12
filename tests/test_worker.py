@@ -42,13 +42,19 @@ def test_run_offline(standalone_worker1, result_num):
 def test_run_offline_mock(standalone_worker_download_offline1):
     test_run_offline(standalone_worker_download_offline1, 0)
 
-def test_fixture_worker_download_offline(standalone_worker_download_offline1):
+def test_fixture_mock_worker_query_offline_product_size(standalone_worker_download_offline1):
+    assert standalone_worker_download_offline1.query_product_size("this shouldnt matter, because its a mock") == 0
+
+def test_fixture_mock_worker_download_offline(standalone_worker_download_offline1):
     w = standalone_worker_download_offline1
     file_path = os.path.join(w.download_location, "S1A_offline.zip")
     w.download_product(file_path, "bla bla")
     assert os.path.exists(file_path) == True
 
-def test_fixture_worker_download_online(standalone_worker_download_online1):
+def test_fixture_mock_worker_query_online_product_size(standalone_worker_download_online1):
+    assert standalone_worker_download_online1.query_product_size("this shouldnt matter, because its a mock") == 759842
+
+def test_fixture_mock_worker_download_online(standalone_worker_download_online1):
     w = standalone_worker_download_online1
     downloaded_file_path = os.path.join(w.download_location, "S1A_online.zip")
     w.download_product(downloaded_file_path, "bla bla")
@@ -84,7 +90,6 @@ def test_run_in_seperate_process_one_worker_offline(worker_manager, worker_downl
     wm.run_workers()
     log = worker_download_offline1.get_log()
     total_retries = wm.total_results * worker_download_offline1.offline_retries
-    assert log.count("Retry attempt") == total_retries
     download_attempts = total_retries + wm.total_results
     assert log.count("Begin downloading") == download_attempts
     assert log.count("Product could be offline.") == download_attempts
@@ -120,10 +125,21 @@ def test_run_in_seperate_process_two_workers_both_online(worker_manager, worker_
         ("https://scihub.copernicus.eu/dhus/odata/v1/Products(\'23759763-91e8-4336-a50a-a143e14c8d69\')/$value", 993398956),
         ("https://scihub.copernicus.eu/dhus/odata/v1/Products(\'05d5daa5-c1aa-4ad6-a600-d39e9a692db5\')/$value", 1049855358),
         ("https://blabla", None),
+        ("https://github.com/potatowagon/copinicoos/blob/remove-dhusget/tests/test_data/S1A_offline.zip?raw=true", 0),
+        ("https://github.com/potatowagon/copinicoos/blob/remove-dhusget/tests/test_data/S1A_online.zip?raw=true", 759842)
     ]
 )
 def test_query_product_size(sample_product_uri, expected_length_in_bytes, standalone_worker1):
     assert standalone_worker1.query_product_size(sample_product_uri) == expected_length_in_bytes
+
+@pytest.mark.parametrize(
+    "file_path, expected_length_in_bytes", [
+        (os.path.join(test_data_dir, "S1A_offline.zip"), 0),
+        (os.path.join(test_data_dir, "S1A_online.zip"), 759842)
+    ]
+)
+def test_get_downloaded_product_size(file_path, expected_length_in_bytes, standalone_worker1):
+    assert standalone_worker1.get_downloaded_product_size(file_path) == expected_length_in_bytes
 
 
 
