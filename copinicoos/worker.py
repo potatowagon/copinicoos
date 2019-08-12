@@ -182,7 +182,9 @@ class Worker(Resumable, Loggable):
                     self.logger.info(Fore.GREEN + "Downloaded product " + title)
                     status = "SUCCESS"
                 break
-        return self.name + " " + title + " " + status
+        outcome = self.name + " " + title + " " + status
+        self.logger.info(outcome)
+        return outcome
 
     def run_in_seperate_process(self, result_num, ready_worker_queue):
         # Setting up logger again because logger is shallow copied to new process and looses setup
