@@ -202,10 +202,8 @@ class MockWokerProductOffline(Worker):
 class MockWokerProductOnline(Worker):
     def query_product_size(self, product_uri):
         ''' Always query the file size of mock online product
-        Args:
-            product uri (str): eg. https://scihub.copernicus.eu/dhus/odata/v1/Products('23759763-91e8-4336-a50a-a143e14c8d69')/$value
         Returns:
-            product file size in bytes (int) or None if product_uri query failed
+            product mock file size in bytes (int) or None if product_uri query failed
         '''
         product_uri = "https://github.com/potatowagon/copinicoos/blob/remove-dhusget/tests/test_data/S1A_online.zip?raw=true"
         try:
