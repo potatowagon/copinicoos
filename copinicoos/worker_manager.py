@@ -64,6 +64,7 @@ class WorkerManager(Resumable, Loggable):
         Each Worker is given a product index to download, and is executed in a seperate Process. 
         Free workers are queued in process.Queue 
         '''
+        # loading resume points
         self.query = query_formatter.adjust_for_specific_product(self.query)
         ready_worker_queue = Queue(maxsize=len(self.worker_list))
         resume_point = self.load_resume_point()
@@ -84,6 +85,7 @@ class WorkerManager(Resumable, Loggable):
                 self.logger.error(e)
                 self.logger.error(Fore.RED + "Error in queueing workers")
         
+        # assigning workers a result number to download
         for i in range (resume_point, int(self.total_results)):
             worker = ready_worker_queue.get()
             if worker.return_msg != None:
@@ -93,6 +95,7 @@ class WorkerManager(Resumable, Loggable):
             resume_point += 1
             self.update_resume_point(resume_point)
 
+        # clearing the last batch
         for i in range(0, len(self.worker_list)):
             worker = ready_worker_queue.get()
             if worker.return_msg:
