@@ -4,6 +4,7 @@ import copy
 import importlib
 
 import pytest
+import psutil
 
 from copinicoos import WorkerManager
 from conftest import test_data_dir, test_dir, query_txt_path, secrets1_json_path, secrets2_json_path, MockWokerProductOnline, check_online_file_downloaded_correctly

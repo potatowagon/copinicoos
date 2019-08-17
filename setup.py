@@ -22,7 +22,8 @@ setup(
             "pytest>=4.6.2",
             "pytest-cov>=2.7.1",
             "pytest-timeout==1.3.3",
-            "Pillow>=5.0.0"
+            "Pillow>=5.0.0",
+            "psutil"
         ]
     },
     python_requires=">=3.0",
