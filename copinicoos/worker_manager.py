@@ -93,8 +93,6 @@ class WorkerManager(Resumable, Loggable):
             resume_point += 1
             self.update_resume_point(resume_point)
 
-        while not ready_worker_queue.full():
-            pass
         for i in range(0, len(self.worker_list)):
             worker = ready_worker_queue.get()
             self.logger.info(worker.return_msg)
