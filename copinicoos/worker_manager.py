@@ -95,7 +95,8 @@ class WorkerManager(Resumable, Loggable):
 
         for i in range(0, len(self.worker_list)):
             worker = ready_worker_queue.get()
-            self.logger.info(worker.return_msg)
+            if worker.return_msg:
+                self.logger.info(worker.return_msg)
         ready_worker_queue.close()
         ready_worker_queue.join_thread()
         self._close_all_loggers()
