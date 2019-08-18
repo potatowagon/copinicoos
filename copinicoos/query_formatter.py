@@ -1,17 +1,17 @@
 def req_search_res_json(query):
         query = query.strip()
+        if not query.startswith('https://scihub.copernicus.eu/dhus/search?q=') and not query.endswith('&format=json'):
+            request_done_str = "Request Done: "
+            if query.startswith(request_done_str):
+                query = query.replace(request_done_str, "")
+            
+            if query.startswith('"') and query.endswith('"'):
+                query = query[1:len(query)-1]
 
-        request_done_str = "Request Done: "
-        if query.startswith(request_done_str):
-            query = query.replace(request_done_str, "")
-        
-        if query.startswith('"') and query.endswith('"'):
-            query = query[1:len(query)-1]
+            if query.startswith("'") and query.endswith("'"):
+                query = query[1:len(query)-1]
 
-        if query.startswith("'") and query.endswith("'"):
-            query = query[1:len(query)-1]
-
-        query = 'https://scihub.copernicus.eu/dhus/search?q=' + query + '&format=json'
+            query = 'https://scihub.copernicus.eu/dhus/search?q=' + query + '&format=json'
         return query
 
 def adjust_for_specific_product(query):
