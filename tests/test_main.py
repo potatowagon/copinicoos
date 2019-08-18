@@ -46,6 +46,7 @@ def test_e2e():
     assert "S1A_IW_GRDH_1SDV_20190606T121339_20190606T121404_027559_031C1F_6EE7 SUCCESS" in wm_log
     assert "S1A_IW_GRDH_1SDV_20190602T001058_20190602T001123_027493_031A2F_CCB8 SUCCESS" in wm_log
 
+@pytest.mark.e2e
 def test_kill_and_resume():
     def get_downloaded_product_size(file_path):
         try:
