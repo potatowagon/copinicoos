@@ -2,6 +2,7 @@ import os
 import logging
 import sys
 from multiprocessing import Process, Queue
+import json
 
 from colorama import Fore
 
@@ -57,6 +58,7 @@ class WorkerManager(Resumable, Loggable):
 
         for worker in self.worker_list:
             worker.setup(self.workdir)
+        self._create_config()
 
     def run_workers(self):
         '''Runs workers by assigning them a product index relative to the total number of products in the search query (starting from 0). 
@@ -105,5 +107,18 @@ class WorkerManager(Resumable, Loggable):
         ready_worker_queue.join_thread()
         self._close_all_loggers()
         self.logger.info("Exiting...")
+
+    def _create_config(self):
+        config_dict = {}
+        config_dict["query"] = self.query
+        for worker in self.worker_list:
+            creds = {}
+            creds["username"] = worker.username
+            creds["password"] = worker.password
+            config_dict[worker.name] = creds
+            with open(os.path.join(self.workdir, 'config.json'), 'w') as config_json:
+                json.dump(config_dict, config_json)
+        
+
 
     
