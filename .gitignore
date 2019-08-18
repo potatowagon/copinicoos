@@ -29,3 +29,9 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+
+# tox
+.tox/
+
+#codecov
+.coverage

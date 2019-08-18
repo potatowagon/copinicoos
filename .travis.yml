@@ -9,7 +9,7 @@ matrix:
         - echo \{\"u1\":\"${USERNAME1}\",\"p1\":\"${PASSWORD1}\"\} > $(pwd)${test_data_dir}secrets1.json
         - echo \{\"u1\":\"${USERNAME1}\",\"p1\":\"${PASSWORD1}\",\"u2\":\"${USERNAME2}\",\"p2\":\"${PASSWORD2}\"\} > $(pwd)${test_data_dir}secrets2.json
         - cat $(pwd)${test_data_dir}secrets1.json
-        - tox
+        - if [ ${TRAVIS_EVENT_TYPE} == "cron" ]; then tox -e e2e; else tox -e unit; fi
         - codecov 
         - sleep 10  # Github build status would not be updated by "codecov" otherwise
     - name: "Python 3.7 on macOS"
@@ -23,7 +23,7 @@ matrix:
         - echo \{\"u1\":\"${USERNAME1}\",\"p1\":\"${PASSWORD1}\",\"u2\":\"${USERNAME2}\",\"p2\":\"${PASSWORD2}\"\} > $(pwd)${test_data_dir}secrets2.json
         - cat $(pwd)${test_data_dir}secrets1.json
         - pip3 install -e .[dev]
-        - pytest -sv -m "not e2e" --cov=copinicoos
+        - if [ ${TRAVIS_EVENT_TYPE} == "cron" ]; then pytest -sv --cov=copinicoos; else pytest -sv -m "not e2e" --cov=copinicoos; fi
         - codecov 
         - sleep 10  # Github build status would not be updated by "codecov" otherwise  
     - name: "Python 3.7 on Windows"
@@ -40,7 +40,7 @@ matrix:
         - echo \{\"u1\":\"${USERNAME1}\",\"p1\":\"${PASSWORD1}\",\"u2\":\"${USERNAME2}\",\"p2\":\"${PASSWORD2}\"\} > $(pwd)${test_data_dir}secrets2.json
         - cat $(pwd)${test_data_dir}secrets1.json
         - pip install -e .[dev]
-        - pytest -sv -m "not e2e" --cov=copinicoos
+        - if [ ${TRAVIS_EVENT_TYPE} == "cron" ]; then pytest -sv --cov=copinicoos; else pytest -sv -m "not e2e" --cov=copinicoos; fi
         - codecov 
         - sleep 10  # Github build status would not be updated by "codecov" otherwise
   
