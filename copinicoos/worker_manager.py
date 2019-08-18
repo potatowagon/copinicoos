@@ -80,7 +80,8 @@ class WorkerManager(Resumable, Loggable):
                 if worker_resume_point == None:
                     ready_worker_queue.put_nowait(worker)
                 else:
-                    worker.run_in_seperate_process(worker_resume_point, ready_worker_queue)
+                    p = Process(target=worker.run_in_seperate_process, args=(worker_resume_point, ready_worker_queue))
+                    p.start()
             except Exception as e:
                 self.logger.error(e)
                 self.logger.error(Fore.RED + "Error in queueing workers")
