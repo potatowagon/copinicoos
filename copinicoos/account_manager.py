@@ -96,3 +96,10 @@ class AccountManager():
         except Exception as e:
             print(e)
             print(Fore.RED + "Error in returning workers. No workers initialised.")
+
+    def add_worker(self, name, userame, password):
+        if self._are_creds_valid(userame, password):
+            self.worker_list.append(Worker(name, userame, password))
+            print(Fore.GREEN + "Worker sucessfully authenticated.")
+        else:
+            raise Exception("Failed to initialise worker.")

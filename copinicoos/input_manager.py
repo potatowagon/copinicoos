@@ -2,6 +2,7 @@ import os
 import subprocess
 import json
 import argparse
+import shutil
 
 from colorama import Fore
 
@@ -17,11 +18,23 @@ class InputManager():
         self.args.download_location = os.getcwd()
         self.args.polling_interval = 6
         self.args.offline_retries = 2
+        self.config_path = None
+        self.copinicoos_logs_path = None
 
     def interactive_input(self):
-        self._get_account_input_i()
-        self._get_query_input_i()
+        refresh = True
         self._get_download_location_input_i()
+        if self._config_exists() and self._prompt_resume():
+            try:
+                self._load_from_config()
+                refresh = False
+            except Exception as e:
+                print(Fore.RED + str(e))
+                refresh = True
+        if refresh:      
+            self._delete_savepoint()
+            self._get_account_input_i()
+            self._get_query_input_i()
         self._get_polling_interval_input_i()
         self._get_offline_retries_input_i()
     
@@ -48,11 +61,17 @@ class InputManager():
     def _get_download_location_input_i(self):
         print(Fore.YELLOW + "Default download directory set to " + self.args.download_location + "\nEnter new path to change, if not will use default.")
         download_location = str(input())
+        self._set_download_location(download_location)
+
+    def _set_download_location(self, download_location):
+        '''Checks of path to download location is valid before setting the download location. Also sets the config file path'''
         if os.path.exists(download_location):
             self.args.download_location = download_location
             print("Download path set to " + download_location)
         else: 
             print("Using default path.")
+        self.copinicoos_logs_path = os.path.join(self.args.download_location, "copinicoos_logs")
+        self.config_path = os.path.join(self.copinicoos_logs_path, "config.json")
 
     def _get_polling_interval_input_i(self):
         print(Fore.YELLOW + "Default polling interval for offline products set to " + str(self.args.polling_interval) + " seconds.\nEnter new polling interval, if not will use default.")
@@ -113,7 +132,7 @@ class InputManager():
             self.account_manager.add_workers_from_json_creds(json_creds)
             self.get_total_results_from_query(args.query)
             self.args.query = query_formatter.req_search_res_json(args.query)
-            self.args.download_location = args.download_location
+            self._set_download_location(args.download_location)
             self.args.offline_retries = args.offline_retries
             self.args.polling_interval = args.polling_interval
         
@@ -134,6 +153,45 @@ class InputManager():
             print(e)
             print(Fore.RED + "Query failed. Please check query and try again")
         return self.args.total_results
+
+    def _config_exists(self):
+        return os.path.exists(self.config_path)
+
+    def _prompt_resume(self):
+        while True:
+            print(Fore.YELLOW + "Save point found. Resume previous download? (y/n)")
+            ans = input()
+            if ans == "y" or ans == "yes" or ans == "Y" or ans == "YES" or ans == "Yes":
+                return True
+            elif ans == "n" or ans == "no" or ans == "N" or ans == "NO" or ans == "No":
+                return False
+            else:
+                print(Fore.RED + "Invalid input. Try again")
+    
+    def _load_from_config(self):
+        '''load total results, query, and workers from config'''
+        try:
+            config_dict = json.load(open(self.config_path))
+            for key in config_dict:
+                if key != "query":
+                    name = key
+                    creds = config_dict[name]
+                    username = creds["username"]
+                    password = creds["password"]
+                    self.account_manager.add_worker(name, username, password)
+            query = config_dict["query"]
+            self.get_total_results_from_query(query)
+            print(Fore.GREEN + str(self.args.total_results) + " products found.")
+            if self.args.total_results == None:
+                raise Exception("Failed to query total results.")     
+            self.args.query = query
+        except Exception as e:
+            self.account_manager.worker_list = []
+            raise Exception("Failed to load config from config.json")
+        
+    def _delete_savepoint(self):
+        if os.path.exists(self.copinicoos_logs_path):
+            shutil.rmtree(self.copinicoos_logs_path)
 
 class Args():
     '''Required args interface'''
