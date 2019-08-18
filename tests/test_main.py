@@ -11,6 +11,9 @@ from conftest import test_data_dir, test_dir, query_txt_path, secrets1_json_path
 query_everest_3_products_txt_path = os.path.join(test_data_dir, "query_everest_3_products.txt")
 query_everest_6_products_txt_path = os.path.join(test_data_dir, "query_everest_6_products.txt")
 
+copinicoos_logs_dir = os.path.join(test_dir, "copinicoos_logs")
+wm_log_path = os.path.join(copinicoos_logs_dir, "WorkerManager.log")
+
 @pytest.mark.parametrize(
     "query, login, num_expected_products", [
         ("@" + query_everest_3_products_txt_path, secrets2_json_path, 3),  
@@ -35,12 +38,10 @@ def test_mock_e2e_download(query, login, num_expected_products, creds):
     assert os.path.exists(os.path.join(test_dir, "copinicoos_logs"))
     assert check_online_file_downloaded_correctly() == num_expected_products
 
-@pytest.mark.parametrize(
-    "query, login", [
-        ("@" + query_txt_path, secrets2_json_path),    
-        ]
-)
 @pytest.mark.e2e
-def test_e2e(query, login):
-    cmd = "py -m copinicoos"
-    subprocess.call(["py", "-m", "copinicoos", query, login])
+def test_e2e():
+    subprocess.call(["py", "-m", "copinicoos", "@" + query_everest_3_products_txt_path, secrets2_json_path, "-d", test_dir])
+    wm_log = open(wm_log_path).read()
+    assert "S1A_IW_GRDH_1SDV_20190606T121404_20190606T121429_027559_031C1F_364C SUCCESS" in wm_log
+    assert "S1A_IW_GRDH_1SDV_20190606T121339_20190606T121404_027559_031C1F_6EE7 SUCCESS" in wm_log
+    assert "S1A_IW_GRDH_1SDV_20190602T001058_20190602T001123_027493_031A2F_CCB8 SUCCESS" in wm_log
