@@ -45,3 +45,47 @@ def test_e2e():
     assert "S1A_IW_GRDH_1SDV_20190606T121404_20190606T121429_027559_031C1F_364C SUCCESS" in wm_log
     assert "S1A_IW_GRDH_1SDV_20190606T121339_20190606T121404_027559_031C1F_6EE7 SUCCESS" in wm_log
     assert "S1A_IW_GRDH_1SDV_20190602T001058_20190602T001123_027493_031A2F_CCB8 SUCCESS" in wm_log
+
+def test_kill_and_resume():
+    def get_downloaded_product_size(file_path):
+        try:
+            b = os.path.getsize(file_path)
+            return int(b)
+        except Exception as e:
+            raise
+
+    def run_and_kill(timeout=60):
+        cmd = ["py", "-m", "copinicoos", "@" + query_everest_6_products_txt_path, secrets2_json_path, "-d", test_dir]
+        try:
+            p = subprocess.Popen(cmd)
+            p.wait(timeout=timeout)
+        except subprocess.TimeoutExpired as e:
+            p.kill()
+            for i in range(0, 4):
+                for proc in psutil.process_iter():
+                    if proc.name() == "wget.exe":
+                        try:
+                            parent_pid = proc.ppid()
+                            proc.kill()
+                            psutil.Process(parent_pid).kill()
+                        except Exception as e:
+                            print(e)
+            wm_progress = open(os.path.join(copinicoos_logs_dir, "WorkerManager_progress.txt")).read()
+            assert wm_progress == "4"
+            for item in os.listdir(copinicoos_logs_dir):
+                if not item.startswith("WorkerManager") and item.endswith("_progress.txt"):
+                    worker_progress = int(open(os.path.join(copinicoos_logs_dir, item)).read())
+                    assert worker_progress >= 0
+                    assert worker_progress < 4
+            product_size_dict = {}
+            for item in os.listdir(test_dir):
+                if item.startswith('S') and item.endswith(".zip"):
+                    product_size_dict[item] = get_downloaded_product_size(os.path.join(test_dir, item))
+            return product_size_dict
+
+    old_product_size_dict = run_and_kill()
+    new_product_size_dict = run_and_kill()
+
+    for product, old_file_size in old_product_size_dict.items():
+        new_file_size = new_product_size_dict[product]
+        assert new_file_size > old_file_size
