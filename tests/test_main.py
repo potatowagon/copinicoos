@@ -55,7 +55,7 @@ def test_kill_and_resume():
             raise
 
     def run_and_kill(timeout=60):
-        cmd = ["py", "-m", "copinicoos", "@" + query_everest_6_products_txt_path, secrets2_json_path, "-d", test_dir]
+        cmd = ["python", "-m", "copinicoos", "@" + query_everest_6_products_txt_path, secrets2_json_path, "-d", test_dir]
         try:
             p = subprocess.Popen(cmd)
             p.wait(timeout=timeout)
