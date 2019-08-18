@@ -64,11 +64,15 @@ def test_kill_and_resume():
             for i in range(0, 4):
                 for proc in psutil.process_iter():
                     if proc.name() == "wget.exe":
+                        parent_pid = proc.ppid()
+                        print(parent_pid)
                         try:
-                            parent_pid = proc.ppid()
                             proc.kill()
+                        except (psutil.NoSuchProcess, ProcessLookupError) as e:
+                            print(e)
+                        try:
                             psutil.Process(parent_pid).kill()
-                        except Exception as e:
+                        except (psutil.NoSuchProcess, ProcessLookupError) as e:
                             print(e)
             wm_progress = open(os.path.join(copinicoos_logs_dir, "WorkerManager_progress.txt")).read()
             assert wm_progress == "4"
