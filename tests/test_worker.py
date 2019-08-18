@@ -24,19 +24,14 @@ def test_query_product_uri_success(standalone_worker1, result_num):
         raise
 
 @pytest.mark.timeout(120)
-@pytest.mark.skip(reason="hitting too many online products")
-@pytest.mark.parametrize(
-    "result_num", [
-        (random.randint(150,300))
-    ]
-)
-def test_run_offline(standalone_worker1, result_num):
-    standalone_worker1.run(result_num)
-    log = standalone_worker1.get_log()
+def test_run_offline(real_offline_worker):
+    result_num = random.randint(2, 11673)
+    real_offline_worker.run(result_num)
+    log = real_offline_worker.get_log()
     assert "Product could be offline. Retrying after " in log
 
 def test_run_offline_mock(standalone_worker_download_offline1):
-    test_run_offline(standalone_worker_download_offline1, 0)
+    standalone_worker_download_offline1.run(0)
 
 def test_fixture_mock_worker_query_offline_product_size(standalone_worker_download_offline1):
     assert standalone_worker_download_offline1.query_product_size("this shouldnt matter, because its a mock") == 0

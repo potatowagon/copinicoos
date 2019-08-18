@@ -19,6 +19,7 @@ from copinicoos.input_manager import Args
 from copinicoos import WorkerManager
 from copinicoos import Worker
 from copinicoos import AccountManager
+from copinicoos import query_formatter
 
 test_dir = os.path.dirname(os.path.realpath(__file__))
 test_data_dir = os.path.join(test_dir, "test_data")
@@ -66,6 +67,21 @@ def formatted_query():
 @pytest.fixture(scope="session")
 def formatted_query1():
     return 'https://scihub.copernicus.eu/dhus/search?q=( footprint:\"Intersects(POLYGON((91.45532862800384 22.42016942838278,91.34620270146559 22.43895934481047,91.32598614177974 22.336847270362682,91.4350291249018 22.31804599405974,91.45532862800384 22.42016942838278)))\" ) AND ( (platformname:Sentinel-1 AND producttype:GRD))&format=json&rows=1&start='
+
+@pytest.fixture(scope="session")
+def formatted_worker_query_offine():
+    query = open(os.path.join(test_data_dir, "offline_query_eu.txt")).read()
+    return query_formatter.adjust_for_specific_product(query)
+
+@pytest.fixture()
+def worker_offline_args(formatted_worker_query_offine):
+    args = Args()
+    args.query = formatted_worker_query_offine
+    args.total_results = 11673 
+    args.download_location = test_dir
+    args.offline_retries = 2
+    args.polling_interval = 6
+    return args
 
 @pytest.fixture()
 def w_args(formatted_query1):
@@ -144,6 +160,11 @@ def worker_download_incomplete1(creds, w_args):
     return init_worker_type("MockWokerIncompleteProductOnline", creds, "1", w_args)
 
 ###### Workers capable of running in stand alone mode 
+@pytest.fixture()
+def real_offline_worker(creds, worker_offline_args):
+    w = init_worker_type("Worker", creds, "1", worker_offline_args, standalone=True)
+    return w
+
 @pytest.fixture()
 def standalone_worker1(creds, w_args):
     w = init_worker_type("Worker", creds, "1", w_args, standalone=True)
