@@ -171,46 +171,47 @@ def test_interactive_input_resume_bad_config(worker_manager, creds, query, capsy
     assert type(args).__name__ == "Args"
     assert len(im.return_worker_list()) == 4
 
-    def test_interactive_input_resume_no(worker_manager, creds, query, capsys):
-        worker_manager.setup_workdir()
-        close_all_loggers()
-        input_values = [
-            test_dir,
-            "n",
-            2,
-            creds["u1"],
-            creds["p1"],
-            creds["u2"],
-            creds["p2"],
-            query,
-            "\n",
-            "\n"
-        ]
-        im = InputManager()
-        def mock_input():
-            return input_values.pop(0)
-        input_manager.input = mock_input
-        im.interactive_input()
+def test_interactive_input_resume_invalid_input_and_no(worker_manager, creds, query, capsys):
+    worker_manager.setup_workdir()
+    close_all_loggers()
+    input_values = [
+        test_dir,
+        "nope",
+        "n",
+        2,
+        creds["u1"],
+        creds["p1"],
+        creds["u2"],
+        creds["p2"],
+        query,
+        "\n",
+        "\n"
+    ]
+    im = InputManager()
+    def mock_input():
+        return input_values.pop(0)
+    input_manager.input = mock_input
+    im.interactive_input()
+
+    out, err = capsys.readouterr()
+    print(out) 
+    assert "Default download directory set to" in out
+    assert "Enter new path" in out
+    assert "Save point found. Resume previous download? (y/n)" in out
+    assert "Failed to load config from config.json" not in out
+    assert "Enter number of accounts:" in out
+    assert "Enter username of account" in out
+    assert "Enter password of account" in out
+    assert "Authenticating worker..." in out
+    assert "Worker sucessfully authenticated." in out
+    assert "Enter query:" in out
+    assert "products found" in out
+    assert "Default polling interval" in out
+    assert "Enter new polling interval" in out
+    assert "Default offline retries" in out
+    assert "Enter new offline retries" in out
     
-        out, err = capsys.readouterr()
-        print(out) 
-        assert "Default download directory set to" in out
-        assert "Enter new path" in out
-        assert "Save point found. Resume previous download? (y/n)" in out
-        assert "Failed to load config from config.json" in out
-        assert "Enter number of accounts:" in out
-        assert "Enter username of account" in out
-        assert "Enter password of account" in out
-        assert "Authenticating worker..." in out
-        assert "Worker sucessfully authenticated." in out
-        assert "Enter query:" in out
-        assert "products found" in out
-        assert "Default polling interval" in out
-        assert "Enter new polling interval" in out
-        assert "Default offline retries" in out
-        assert "Enter new offline retries" in out
-        
-        args = im.return_args() 
-        assert type(args).__name__ == "Args"
-        assert len(im.return_worker_list()) == 4
+    args = im.return_args() 
+    assert type(args).__name__ == "Args"
+    assert len(im.return_worker_list()) == 4
 
