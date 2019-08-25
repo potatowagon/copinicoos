@@ -94,6 +94,15 @@ class Worker(Resumable, Loggable):
         return title, product_uri
 
     def download_product(self, file_path, product_uri):
+        '''Download product in a non blocking wget subprocess
+        
+        Args: 
+            file_path (str): path to file where downloaded content will be written to, eg ./product.zip
+            product_uri (str): eg. https://scihub.copernicus.eu/dhus/odata/v1/Products('bc8421bd-2930-48eb-9caf-7b8d23df36eb')/$value
+
+        Return:
+            proc (subprocess.Popen): a Popen object that is runnng the download process
+        '''
         try:
             cmd = ["wget", "-O", file_path, "--continue", "--user=" + self.username, "--password=" + self.password, product_uri]
             self.logger.info(Fore.YELLOW + " ".join(cmd))
@@ -134,9 +143,6 @@ class Worker(Resumable, Loggable):
                     self.logger.info(msg)
                     self.log_download_progress_lock.release()
             else:
-                self.log_download_progress_lock.acquire()
-                self.logger.debug("EoF")
-                self.log_download_progress_lock.release()
                 proc.stdout.flush()
 
     def query_product_size(self, product_uri):
