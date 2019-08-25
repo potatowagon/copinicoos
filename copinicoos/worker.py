@@ -153,7 +153,7 @@ class Worker(Resumable, Loggable):
                 msg = None
                 try:
                     response = re.search(r'HTTP request sent, awaiting response... .+', line).group(0)
-                    msg = response
+                    msg = title + ", " + response
                 except AttributeError as e:
                     pass
                 try:
