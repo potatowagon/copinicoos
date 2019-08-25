@@ -10,7 +10,7 @@ import re
 import zipfile
 
 import colorama
-from colorama import Fore
+from colorama import Fore, Back, Style
 
 from .resumable import Resumable
 from .loggable import Loggable
@@ -18,6 +18,7 @@ from .loggable import Loggable
 class Worker(Resumable, Loggable):
     request_lock = Lock()
     log_download_progress_lock = Lock()
+    worker_instances_list = []
 
     def __init__(self, worker_name, username, password):
         Resumable.__init__(self)
@@ -33,6 +34,33 @@ class Worker(Resumable, Loggable):
         self.logger = None
         self.return_msg = None
         self.download_bar = None 
+        self.colour = ""
+        Worker.worker_instances_list.append(self)
+        Worker.assign_colours()
+
+    def __del__(self):
+        try:
+            Worker.worker_instances_list.remove(self)
+        except ValueError as e:
+            pass
+
+    @classmethod
+    def assign_colours(cls):
+        '''Assign each worker instance a background colour when logging download progress'''
+        for i in range(0, len(cls.worker_instances_list)):
+            mode = i % 6
+            if mode == 0:
+                cls.worker_instances_list[i].colour = Back.CYAN + Style.BRIGHT
+            elif mode == 1:
+                cls.worker_instances_list[i].colour = Back.MAGENTA + Style.BRIGHT
+            elif mode == 2:
+                cls.worker_instances_list[i].colour = Back.BLUE + Style.BRIGHT
+            elif mode == 3:
+                cls.worker_instances_list[i].colour = Back.GREEN + Style.BRIGHT
+            elif mode == 4:
+                cls.worker_instances_list[i].colour = Back.YELLOW + Style.BRIGHT + Fore.RED
+            elif mode == 5:
+                cls.worker_instances_list[i].colour = Back.RED + Style.BRIGHT
 
     def setup(self, workdir):
         self.workdir = workdir
@@ -140,7 +168,7 @@ class Worker(Resumable, Loggable):
                     pass
                 if msg:
                     self.log_download_progress_lock.acquire()
-                    self.logger.info(msg)
+                    self.logger.info(self.colour + msg)
                     self.log_download_progress_lock.release()
             else:
                 proc.stdout.flush()

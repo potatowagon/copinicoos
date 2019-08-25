@@ -7,6 +7,7 @@ import sys
 
 import pytest
 
+from copinicoos import Worker
 from conftest import test_data_dir, test_dir, check_online_file_downloaded_correctly
 
 @pytest.mark.parametrize(
@@ -160,6 +161,25 @@ def test_regex_match_download_bar():
     m = re.search(regex, out)
     print('\n')
     print(m.group(0))
+
+def test_assign_colours():
+    worker0 = Worker("worker0", "u0", "p0")
+    worker1 = Worker("worker1", "u1", "p1")
+    worker2 = Worker("worker2", "u2", "p2")
+    worker3 = Worker("worker3", "u3", "p3")
+    worker4 = Worker("worker4", "u4", "p4")
+    worker5 = Worker("worker5", "u5", "p5")
+    worker6 = Worker("worker6", "u6", "p6")
+    worker7 = Worker("worker7", "u7", "p7")
+
+    Worker.assign_colours()
+    for worker in Worker.worker_instances_list:
+        print(worker.colour + "This is the colour of " + worker.name)
+
+    old_list_len = len(Worker.worker_instances_list)
+    assert worker0 in Worker.worker_instances_list 
+    worker0.__del__()
+    assert len(Worker.worker_instances_list) + 1 ==  old_list_len
 
 @pytest.mark.skip(reason="this is a draft")
 def test_wget_output_subprocess():
