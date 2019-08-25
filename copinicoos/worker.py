@@ -10,13 +10,15 @@ import re
 import zipfile
 
 import colorama
-from colorama import Fore
+from colorama import Fore, Back, Style
 
 from .resumable import Resumable
 from .loggable import Loggable
 
 class Worker(Resumable, Loggable):
     request_lock = Lock()
+    log_download_progress_lock = Lock()
+    worker_instances_list = []
 
     def __init__(self, worker_name, username, password):
         Resumable.__init__(self)
@@ -30,7 +32,35 @@ class Worker(Resumable, Loggable):
         self.polling_interval = None
         self.offline_retries = None
         self.logger = None
-        self.return_msg = None 
+        self.return_msg = None
+        self.download_bar = None 
+        self.colour = ""
+        Worker.worker_instances_list.append(self)
+        Worker.assign_colours()
+
+    def __del__(self):
+        try:
+            Worker.worker_instances_list.remove(self)
+        except ValueError as e:
+            pass
+
+    @classmethod
+    def assign_colours(cls):
+        '''Assign each worker instance a background colour when logging download progress'''
+        for i in range(0, len(cls.worker_instances_list)):
+            mode = i % 6
+            if mode == 0:
+                cls.worker_instances_list[i].colour = Back.CYAN + Style.BRIGHT
+            elif mode == 1:
+                cls.worker_instances_list[i].colour = Back.MAGENTA + Style.BRIGHT
+            elif mode == 2:
+                cls.worker_instances_list[i].colour = Back.BLUE + Style.BRIGHT
+            elif mode == 3:
+                cls.worker_instances_list[i].colour = Back.GREEN + Style.BRIGHT
+            elif mode == 4:
+                cls.worker_instances_list[i].colour = Back.YELLOW + Style.BRIGHT + Fore.RED
+            elif mode == 5:
+                cls.worker_instances_list[i].colour = Back.RED + Style.BRIGHT
 
     def setup(self, workdir):
         self.workdir = workdir
@@ -92,12 +122,56 @@ class Worker(Resumable, Loggable):
         return title, product_uri
 
     def download_product(self, file_path, product_uri):
+        '''Download product in a non blocking wget subprocess
+        
+        Args: 
+            file_path (str): path to file where downloaded content will be written to, eg ./product.zip
+            product_uri (str): eg. https://scihub.copernicus.eu/dhus/odata/v1/Products('bc8421bd-2930-48eb-9caf-7b8d23df36eb')/$value
+
+        Return:
+            proc (subprocess.Popen): a Popen object that is runnng the download process
+        '''
         try:
             cmd = ["wget", "-O", file_path, "--continue", "--user=" + self.username, "--password=" + self.password, product_uri]
             self.logger.info(Fore.YELLOW + " ".join(cmd))
-            subprocess.call(cmd)
+            proc = subprocess.Popen(cmd, stderr=subprocess.STDOUT, stdout=subprocess.PIPE, text=True, universal_newlines=True)
+            return proc
         except Exception as e:
             raise
+
+    def _log_download_progress(self, proc, title, file_size):
+        '''logs the the relevant info of a wget download process
+
+        Args:
+            proc (subprocess.Popen): Popen object running wget download process, with stderr piped to stdout
+            title (str): name of downloaded file
+            file_size (int): full size of file to be downloaded
+        '''
+        while proc.poll() is None:
+            line = proc.stdout.readline()
+            if line:
+                msg = None
+                try:
+                    response = re.search(r'HTTP request sent, awaiting response... .+', line).group(0)
+                    msg = title + ", " + response
+                except AttributeError as e:
+                    pass
+                try:
+                    progress_perc = r'\d+%'
+                    progress_perc = re.search(progress_perc, line).group(0)
+                    time_left = r'(\d+[hms])+'
+                    time_left = re.search(time_left, line).group(0)
+                    downloaded = r'\d+[KM]'
+                    downloaded = re.search(downloaded, line).group(0)
+                    msg = title + ', Progress: ' + progress_perc + ', Downloaded: ' + downloaded + '/' + str(file_size) + ', Time left: ' + time_left 
+                except AttributeError as e:
+                    pass
+                if msg:
+                    self.log_download_progress_lock.acquire()
+                    self.logger.info(self.colour + msg)
+                    self.log_download_progress_lock.release()
+            else:
+                proc.stdout.flush()
 
     def query_product_size(self, product_uri):
         ''' Query the file size of product
@@ -165,7 +239,8 @@ class Worker(Resumable, Loggable):
             self.logger.info("Download attempt number " + str(attempt) + " of " + str(max_attempts))
             self._prepare_to_request()
             self.logger.info(Fore.GREEN + "Begin downloading\n" + title + "\nat\n" + product_uri + "\n")
-            self.download_product(file_path, product_uri)
+            proc = self.download_product(file_path, product_uri)
+            self._log_download_progress(proc, title, complete_product_size)
             product_size = self.get_downloaded_product_size(file_path)
             if product_size == 0:
                 self.logger.warning(Fore.YELLOW + "Product could be offline. Retrying after " + str(self.polling_interval) + " seconds.")

@@ -10,6 +10,7 @@ import subprocess
 import time
 from zipfile import ZipFile
 import re
+from abc import ABC, abstractmethod
 
 import pytest
 from PIL import Image
@@ -190,76 +191,55 @@ def standalone_worker_download_online2(creds, w_args):
 @pytest.fixture()
 def standalone_worker_download_offline2(creds, w_args):
     return init_worker_type("MockWokerProductOffline", creds, "2", w_args, standalone=True)
-            
-class MockWokerProductOffline(Worker):
+
+class MockWorker(Worker, ABC):
+    @property
+    @abstractmethod
+    def mock_product_uri(self):
+        pass
+
     def query_product_size(self, product_uri):
-        ''' Always query the file size of mock offline product
+        ''' Always query the file size of self.product_uri
         Args:
-            product uri (str): eg. https://scihub.copernicus.eu/dhus/odata/v1/Products('23759763-91e8-4336-a50a-a143e14c8d69')/$value
+            product uri (str): doenst matter, just to fit the api
         Returns:
-            product file size in bytes (int) or None if product_uri query failed
+            product file size in bytes (int) or None if self.product_uri query failed
         '''
         product_uri = "https://github.com/potatowagon/copinicoos/blob/remove-dhusget/tests/test_data/S1A_offline.zip?raw=true"
         try:
-            cmd = ["wget", "--spider", "--user=" + self.username, "--password=" + self.password, product_uri]
+            cmd = ["wget", "--spider", "--user=" + self.username, "--password=" + self.password, self.mock_product_uri]
             out = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
             m = re.search(r'(?<=Length: )\d+', str(out))
             length = int(m.group(0))
             return length
         except Exception as e:
             self.logger.error(e)
-            self.logger.error("Error in querying product size for " + product_uri)
+            self.logger.error("Error in querying product size for " + self.mock_product_uri)
             return None
 
     def download_product(self, file_path, product_uri):
         try:
-            product_uri =  "https://github.com/potatowagon/copinicoos/blob/remove-dhusget/tests/test_data/S1A_offline.zip?raw=true"
-            cmd = ["wget", "-O", file_path, "--continue", product_uri]
+            cmd = ["wget", "-O", file_path, "--continue", self.mock_product_uri]
             self.logger.info(cmd)
-            subprocess.call(cmd)
+            proc = subprocess.Popen(cmd, stderr=subprocess.STDOUT, stdout=subprocess.PIPE, text=True, universal_newlines=True)
+            return proc
         except Exception as e:
             raise
+    
+    def mock_log_download_progress(self, proc):
+        self._log_download_progress(proc, "Mock product", self.query_product_size(self.mock_product_uri))
+            
+class MockWokerProductOffline(MockWorker):
+    mock_product_uri = "https://github.com/potatowagon/copinicoos/blob/remove-dhusget/tests/test_data/S1A_offline.zip?raw=true"
 
-class MockWokerProductOnline(Worker):
-    def query_product_size(self, product_uri):
-        ''' Always query the file size of mock online product
-        Returns:
-            product mock file size in bytes (int) or None if product_uri query failed
-        '''
-        product_uri = "https://github.com/potatowagon/copinicoos/blob/remove-dhusget/tests/test_data/S1A_online.zip?raw=true"
-        try:
-            cmd = ["wget", "--spider", "--user=" + self.username, "--password=" + self.password, product_uri]
-            out = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
-            m = re.search(r'(?<=Length: )\d+', str(out))
-            length = int(m.group(0))
-            return length
-        except Exception as e:
-            self.logger.error(e)
-            self.logger.error("Error in querying product size for " + product_uri)
-            return None
 
-    def download_product(self, file_path, product_uri):
-        try:
-            product_uri =  "https://github.com/potatowagon/copinicoos/blob/remove-dhusget/tests/test_data/S1A_online.zip?raw=true"
-            cmd = ["wget", "-O", file_path, "--continue", product_uri]
-            self.logger.info(cmd)
-            subprocess.call(cmd)
-        except Exception as e:
-            raise
+class MockWokerProductOnline(MockWorker):
+    mock_product_uri = "https://github.com/potatowagon/copinicoos/blob/remove-dhusget/tests/test_data/S1A_online.zip?raw=true"
 
-class MockWokerIncompleteProductOnline(Worker):
+class MockWokerIncompleteProductOnline(MockWokerProductOnline):
     def query_product_size(self, product_uri):
         '''Returns some incredibly large mock file size'''
         return 9999999999999999
-
-    def download_product(self, file_path, product_uri):
-        try:
-            product_uri =  "https://github.com/potatowagon/copinicoos/blob/remove-dhusget/tests/test_data/S1A_online.zip?raw=true"
-            cmd = ["wget", "-O", file_path, "--continue", product_uri]
-            self.logger.info(cmd)
-            subprocess.call(cmd)
-        except Exception as e:
-            raise
 
 def check_online_file_downloaded_correctly():
     '''Fail test case if mock online file cannot be opened
