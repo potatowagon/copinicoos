@@ -1,6 +1,9 @@
 import os
 import random
 import re
+import subprocess
+import time
+import sys
 
 import pytest
 
@@ -39,7 +42,8 @@ def test_fixture_mock_worker_query_offline_product_size(standalone_worker_downlo
 def test_fixture_mock_worker_download_offline(standalone_worker_download_offline1):
     w = standalone_worker_download_offline1
     file_path = os.path.join(w.download_location, "S1A_offline.zip")
-    w.download_product(file_path, "bla bla")
+    proc = w.download_product(file_path, "bla bla")
+    w.mock_log_download_progress(proc)
     assert os.path.exists(file_path) == True
 
 def test_fixture_mock_worker_query_online_product_size(standalone_worker_download_online1):
@@ -48,7 +52,8 @@ def test_fixture_mock_worker_query_online_product_size(standalone_worker_downloa
 def test_fixture_mock_worker_download_online(standalone_worker_download_online1):
     w = standalone_worker_download_online1
     downloaded_file_path = os.path.join(w.download_location, "S1A_online.zip")
-    w.download_product(downloaded_file_path, "bla bla")
+    proc = w.download_product(downloaded_file_path, "bla bla")
+    w.mock_log_download_progress(proc)
     assert os.path.exists(downloaded_file_path) == True
     log = w.get_log()
     assert "https://github.com/potatowagon/copinicoos" in log
@@ -148,3 +153,41 @@ def test_query_product_size(sample_product_uri, expected_length_in_bytes, standa
 )
 def test_get_downloaded_product_size(file_path, expected_length_in_bytes, standalone_worker1):
     assert standalone_worker1.get_downloaded_product_size(file_path) == expected_length_in_bytes
+
+def test_regex_match_download_bar():
+    out = "Saving to: 'C:/Users/Sherry/Desktop/nus/FYP-20180824T033439Z-001/copernicus/copinicoos/tests/S1A_online.zip'\n\nC:/Users/Sherry/Desktop/nus/FYP-201808 100%[=========================================================================>] 742.03K  --.-KB/s    in 0.1s\n\n2019-08-24 18:04:36 (7.62 MB/s) - 'C:/Users/Sherry/Desktop/nus/FYP-20180824T033439Z-001/copernicus/copinicoos/tests/S1A_online.zip' saved [759842/759842]"
+    regex = r'\d+%\[.*\].*\n'
+    m = re.search(regex, out)
+    print('\n')
+    print(m.group(0))
+
+@pytest.mark.skip(reason="this is a draft")
+def test_wget_output_subprocess():
+    mock_product_uri =  "https://github.com/potatowagon/copinicoos/blob/remove-dhusget/tests/test_data/S1A_online.zip?raw=true"
+    cmd = ["wget", "-O", os.path.join(test_dir, 'S1A_IW_GRDH_1SDV_20190521T001122_20190521T001147_027318_0314BE_D75D.zip'), "--continue", mock_product_uri]
+    real_product = "wget -O C:\\Users\\Sherry\\Desktop\\nus\\FYP-20180824T033439Z-001\\copernicus\\copinicoos\\tests\\S1A_IW_GRDH_1SDV_20190521T001122_20190521T001147_027318_0314BE_D75D.zip --continue --user=copinicoos1 --password=sondra11 https://scihub.copernicus.eu/dhus/odata/v1/Products('05d5daa5-c1aa-4ad6-a600-d39e9a692db5')/$value"
+    proc = subprocess.Popen(cmd, stderr=subprocess.STDOUT, stdout=subprocess.PIPE, text=True, universal_newlines=True)
+    #proc = subprocess.Popen(real_product, stdout=subprocess.PIPE, bufsize=1, universal_newlines=True)
+    print("here")
+    logged = []
+    while proc.poll() is None:
+        line = proc.stdout.readline()
+        print(line)
+        if line:
+            try:
+                 response = re.search(r'HTTP request sent, awaiting response... .+', line).group(0)
+                 print(response)
+            except AttributeError as e:
+                pass
+            try:
+                progress_perc = r'\d+%'
+                progress_perc = re.search(progress_perc, line).group(0)
+                time_left = r'(\d+[hms])+'
+                time_left = re.search(time_left, line).group(0)
+                downloaded = r'\d+[KM]'
+                downloaded = re.search(downloaded, line).group(0)
+                print('Progress: ' + progress_perc + ' Time left: ' + time_left + ' Downloaded: ' + downloaded)
+            except AttributeError as e:
+                print(e)
+        else:
+            print(proc.poll())

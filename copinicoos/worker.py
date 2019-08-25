@@ -17,6 +17,7 @@ from .loggable import Loggable
 
 class Worker(Resumable, Loggable):
     request_lock = Lock()
+    log_download_progress_lock = Lock()
 
     def __init__(self, worker_name, username, password):
         Resumable.__init__(self)
@@ -30,7 +31,8 @@ class Worker(Resumable, Loggable):
         self.polling_interval = None
         self.offline_retries = None
         self.logger = None
-        self.return_msg = None 
+        self.return_msg = None
+        self.download_bar = None 
 
     def setup(self, workdir):
         self.workdir = workdir
@@ -95,9 +97,47 @@ class Worker(Resumable, Loggable):
         try:
             cmd = ["wget", "-O", file_path, "--continue", "--user=" + self.username, "--password=" + self.password, product_uri]
             self.logger.info(Fore.YELLOW + " ".join(cmd))
-            subprocess.call(cmd)
+            proc = subprocess.Popen(cmd, stderr=subprocess.STDOUT, stdout=subprocess.PIPE, text=True, universal_newlines=True)
+            return proc
         except Exception as e:
             raise
+
+    def _log_download_progress(self, proc, title, file_size):
+        '''logs the the relevant info of a wget download process
+
+        Args:
+            proc (subprocess.Popen): Popen object running wget download process, with stderr piped to stdout
+            title (str): name of downloaded file
+            file_size (int): full size of file to be downloaded
+        '''
+        while proc.poll() is None:
+            line = proc.stdout.readline()
+            if line:
+                msg = None
+                try:
+                    response = re.search(r'HTTP request sent, awaiting response... .+', line).group(0)
+                    msg = response
+                except AttributeError as e:
+                    pass
+                try:
+                    progress_perc = r'\d+%'
+                    progress_perc = re.search(progress_perc, line).group(0)
+                    time_left = r'(\d+[hms])+'
+                    time_left = re.search(time_left, line).group(0)
+                    downloaded = r'\d+[KM]'
+                    downloaded = re.search(downloaded, line).group(0)
+                    msg = title + ', Progress: ' + progress_perc + ', Downloaded: ' + downloaded + '/' + str(file_size) + ', Time left: ' + time_left 
+                except AttributeError as e:
+                    pass
+                if msg:
+                    self.log_download_progress_lock.acquire()
+                    self.logger.info(msg)
+                    self.log_download_progress_lock.release()
+            else:
+                self.log_download_progress_lock.acquire()
+                self.logger.debug("EoF")
+                self.log_download_progress_lock.release()
+                proc.stdout.flush()
 
     def query_product_size(self, product_uri):
         ''' Query the file size of product
@@ -165,7 +205,8 @@ class Worker(Resumable, Loggable):
             self.logger.info("Download attempt number " + str(attempt) + " of " + str(max_attempts))
             self._prepare_to_request()
             self.logger.info(Fore.GREEN + "Begin downloading\n" + title + "\nat\n" + product_uri + "\n")
-            self.download_product(file_path, product_uri)
+            proc = self.download_product(file_path, product_uri)
+            self._log_download_progress(proc, title, complete_product_size)
             product_size = self.get_downloaded_product_size(file_path)
             if product_size == 0:
                 self.logger.warning(Fore.YELLOW + "Product could be offline. Retrying after " + str(self.polling_interval) + " seconds.")
