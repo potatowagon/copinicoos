@@ -3,6 +3,7 @@ import subprocess
 import json
 import argparse
 import shutil
+import getpass
 
 from colorama import Fore
 
@@ -46,7 +47,7 @@ class InputManager():
             print(Fore.YELLOW + "Enter username of account " + str(i))
             username = input()
             print(Fore.YELLOW + "Enter password of account " + str(i))
-            password = input()
+            password = getpass.getpass()
             if self.account_manager.add_two_workers_per_account(username, password):
                 i += 1
                 

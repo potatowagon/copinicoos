@@ -133,7 +133,6 @@ class Worker(Resumable, Loggable):
         '''
         try:
             cmd = ["wget", "-O", file_path, "--continue", "--user=" + self.username, "--password=" + self.password, product_uri]
-            self.logger.info(Fore.YELLOW + " ".join(cmd))
             proc = subprocess.Popen(cmd, stderr=subprocess.STDOUT, stdout=subprocess.PIPE, text=True, universal_newlines=True)
             return proc
         except Exception as e:

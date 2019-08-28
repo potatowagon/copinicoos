@@ -59,9 +59,7 @@ def test_interactive_input(capsys, creds, query):
         test_dir,
         2,
         creds["u1"],
-        creds["p1"],
         creds["u2"],
-        creds["p2"],
         query,
         "\n",
         "\n"
@@ -70,6 +68,15 @@ def test_interactive_input(capsys, creds, query):
     def mock_input():
         return input_values.pop(0)
     input_manager.input = mock_input
+
+    passwords = [
+        creds["p1"],
+        creds["p2"]
+    ]
+    def mock_getpass():
+        return passwords.pop(0)
+    input_manager.getpass.getpass = mock_getpass    
+
     im.interactive_input()
     out, err = capsys.readouterr()
     assert "Default download directory set to" in out
@@ -137,9 +144,7 @@ def test_interactive_input_resume_bad_config(worker_manager, creds, query, capsy
         "y",
         2,
         creds["u1"],
-        creds["p1"],
         creds["u2"],
-        creds["p2"],
         query,
         "\n",
         "\n"
@@ -148,6 +153,15 @@ def test_interactive_input_resume_bad_config(worker_manager, creds, query, capsy
     def mock_input():
         return input_values.pop(0)
     input_manager.input = mock_input
+
+    passwords = [
+        creds["p1"],
+        creds["p2"]
+    ]
+    def getpass():
+        return passwords.pop(0)
+    input_manager.getpass.getpass = getpass
+
     im.interactive_input()
 
     out, err = capsys.readouterr()
@@ -180,9 +194,7 @@ def test_interactive_input_resume_invalid_input_and_no(worker_manager, creds, qu
         "n",
         2,
         creds["u1"],
-        creds["p1"],
         creds["u2"],
-        creds["p2"],
         query,
         "\n",
         "\n"
@@ -191,6 +203,15 @@ def test_interactive_input_resume_invalid_input_and_no(worker_manager, creds, qu
     def mock_input():
         return input_values.pop(0)
     input_manager.input = mock_input
+
+    passwords = [
+        creds["p1"],
+        creds["p2"]
+    ]
+    def getpass():
+        return passwords.pop(0)
+    input_manager.getpass.getpass = getpass
+
     im.interactive_input()
 
     out, err = capsys.readouterr()
