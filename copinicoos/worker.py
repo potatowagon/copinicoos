@@ -2,7 +2,7 @@ import os
 import subprocess
 import json
 import time
-from multiprocessing import Lock
+from multiprocessing import Lock, Process
 from threading import Thread
 import logging 
 import sys
@@ -199,20 +199,20 @@ class Worker(Resumable, Loggable):
         except Exception as e:
             self.logger.error(e)
 
-    def _hold_lock(self):
+    def _hold_lock(self, request_lock):
         self.logger = self._setup_logger(self.name, self.workdir)
-        self.logger.debug(self.name + " has the lock. Ready to send requests...")
+        self.logger.debug("\n\n" + self.name + " has the lock. Ready to send requests...\n\n")
         time.sleep(5)
-        self.request_lock.release()
+        request_lock.release()
 
     def _prepare_to_request(self):
         ''' prepare to send a request by acquiring lock. 
         Has 5 seconds to be the only one making a request while holding lock
         '''
         self.request_lock.acquire()
-        hold_lock_thread = Thread(target=self._hold_lock)
+        hold_lock_thread = Thread(target=self._hold_lock, args=(self.request_lock,))
         hold_lock_thread.start()
-
+        
     def register_settings(self, query, download_location, polling_interval, offline_retries):
         self.query = query
         self.download_location = download_location
@@ -262,12 +262,16 @@ class Worker(Resumable, Loggable):
         self.logger.info(outcome)
         return outcome
 
-    def run_in_seperate_process(self, result_num, ready_worker_queue):
+    def run_in_seperate_process(self, result_num, ready_worker_queue, request_lock, log_download_progress_lock):
         # Setting up logger again because logger is shallow copied to new process and looses setup
         self.logger = self._setup_logger(self.name, self.workdir)
+        self.request_lock = request_lock
+        self.log_download_progress_lock = log_download_progress_lock
         self.return_msg = None
         self.update_resume_point(result_num)
         self.logger.info("running worker" + self.name)
         self.return_msg = self.run(result_num)
         self._close_all_loggers()
+        self.request_lock = None
+        self.log_download_progress_lock = None
         ready_worker_queue.put(self)
