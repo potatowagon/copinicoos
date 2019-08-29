@@ -69,9 +69,11 @@ class Worker(Resumable, Loggable):
         self._setup_progress_log(progress_log_path)
 
     def query_total_results(self, query):
-        '''
-        params: a query that request a response in json
-        returns: the total number of product results from the query response
+        ''' Get the total number of products in a search query 
+        Args: 
+            query (str): a query that request a response in json
+        Returns: 
+            total_results (int): the total number of product results from the query response
         '''
         json_file = "res.json"
         try:
