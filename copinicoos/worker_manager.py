@@ -1,7 +1,7 @@
 import os
 import logging
 import sys
-from multiprocessing import Process, Queue
+from multiprocessing import Process, Queue, Lock
 import json
 
 from colorama import Fore
@@ -66,6 +66,9 @@ class WorkerManager(Resumable, Loggable):
         Each Worker is given a product index to download, and is executed in a seperate Process. 
         Free workers are queued in process.Queue 
         '''
+        # create locks
+        request_lock = Lock()
+        log_download_progress_lock = Lock()
         # loading resume points
         self.query = query_formatter.adjust_for_specific_product(self.query)
         ready_worker_queue = Queue(maxsize=len(self.worker_list))
@@ -82,7 +85,7 @@ class WorkerManager(Resumable, Loggable):
                 if worker_resume_point == None:
                     ready_worker_queue.put_nowait(worker)
                 else:
-                    p = Process(target=worker.run_in_seperate_process, args=(worker_resume_point, ready_worker_queue))
+                    p = Process(target=worker.run_in_seperate_process, args=(worker_resume_point, ready_worker_queue, request_lock, log_download_progress_lock))
                     p.start()
             except Exception as e:
                 self.logger.error(e)
@@ -93,7 +96,7 @@ class WorkerManager(Resumable, Loggable):
             worker = ready_worker_queue.get()
             if worker.return_msg != None:
                 self.logger.info(worker.return_msg)
-            p = Process(target=worker.run_in_seperate_process, args=(i, ready_worker_queue))
+            p = Process(target=worker.run_in_seperate_process, args=(i, ready_worker_queue, request_lock, log_download_progress_lock))
             p.start()
             resume_point += 1
             self.update_resume_point(resume_point)
