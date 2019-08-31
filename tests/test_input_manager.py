@@ -20,6 +20,10 @@ def test_cmd_input(query, login):
     args = im.return_args()
     assert type(args).__name__ == "Args"
 
+def test_new_cmd_input():
+    im = InputManager()
+    im.cmd_input(test_args=['fresh','-h'])
+
 def test_get_total_results_from_query_success(query, input_manager_with_2_workers):
     im = input_manager_with_2_workers
     tr = im.get_total_results_from_query(query)
