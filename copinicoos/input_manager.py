@@ -117,25 +117,6 @@ class InputManager():
             print(e)
             print(Fore.RED + "Error in input. One or more required argument is not defined.")
 
-    '''
-    def cmd_input(self, test_args=None):
-        parser = argparse.ArgumentParser(fromfile_prefix_chars='@', description="Copernicus Downloader Bot. Use @ to load input from file.\neg. py -m copinicoos '( (platformname:Sentinel-1 AND filename:S1A_*))' {'u1':'username1','p1':'password1','u2':'username2','p2':'password2'}")
-        parser.add_argument('query', type=str, help="The query in OpenSearch API format. To generate a query, in Copenicus Open Hub apply search filters and search. The query will appear below the search bae as Request Done: (...)")
-        parser.add_argument('credentials', type=str, help="Input path to @example.json file with credentials, or input credentials in json format.\nThe username is abbr. with uN, password with pN, where N is the account number, starting from one. for eg.\n{'u1':'username1','p1':'password1','u2':'username2','p2':'password2'}\nAttempts a login with 2 accounts")
-        parser.add_argument('-d', '--download-location', help="Path to download folder", default=self.args.download_location)
-        parser.add_argument('-r', '--offline-retries', help="Number of get retries for offline product", default=self.args.offline_retries)
-        parser.add_argument('-p', '--polling-interval', help="Duration between each offline retry, in seconds", default=self.args.polling_interval)
-        if test_args == None:
-            args = parser.parse_args()
-        else:
-            args = parser.parse_args(test_args)
-        if args != None:
-            
-            self._set_download_location(args.download_location)
-            self.args.offline_retries = args.offline_retries
-            self.args.polling_interval = args.polling_interval
-    '''
-
     def cmd_input(self, test_args=None):
         # create global options parser
         parser_global_options = argparse.ArgumentParser(add_help=False)
