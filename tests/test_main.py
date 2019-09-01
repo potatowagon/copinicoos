@@ -32,7 +32,7 @@ def test_mock_e2e_download(query, login, num_expected_products, creds):
     
     WorkerManager.init_from_args = mock_init_from_args
     import sys
-    sys.argv = ["boop", query, login, "-d", test_dir]
+    sys.argv = ["boop", "fresh", query, login, "-d", test_dir]
     import copinicoos.__main__
     importlib.reload(copinicoos.__main__)
     assert os.path.exists(os.path.join(test_dir, "copinicoos_logs"))
@@ -40,7 +40,7 @@ def test_mock_e2e_download(query, login, num_expected_products, creds):
 
 @pytest.mark.e2e
 def test_e2e():
-    subprocess.call(["py", "-m", "copinicoos", "@" + query_everest_3_products_txt_path, secrets2_json_path, "-d", test_dir])
+    subprocess.call(["py", "-m", "copinicoos", "fresh", "@" + query_everest_3_products_txt_path, secrets2_json_path, "-d", test_dir])
     wm_log = open(wm_log_path).read()
     assert "S1A_IW_GRDH_1SDV_20190606T121404_20190606T121429_027559_031C1F_364C SUCCESS" in wm_log
     assert "S1A_IW_GRDH_1SDV_20190606T121339_20190606T121404_027559_031C1F_6EE7 SUCCESS" in wm_log
@@ -55,8 +55,7 @@ def test_kill_and_resume():
         except Exception as e:
             raise
 
-    def run_and_kill(timeout=60):
-        cmd = ["python", "-m", "copinicoos", "@" + query_everest_6_products_txt_path, secrets2_json_path, "-d", test_dir]
+    def run_and_kill(cmd, timeout=60):
         try:
             p = subprocess.Popen(cmd)
             p.wait(timeout=timeout)
@@ -88,8 +87,10 @@ def test_kill_and_resume():
                     product_size_dict[item] = get_downloaded_product_size(os.path.join(test_dir, item))
             return product_size_dict
 
-    old_product_size_dict = run_and_kill()
-    new_product_size_dict = run_and_kill()
+    cmd = ["python", "-m", "copinicoos", "fresh", "@" + query_everest_6_products_txt_path, secrets2_json_path, "-d", test_dir]
+    old_product_size_dict = run_and_kill(cmd)
+    cmd = ["python", "-m", "copinicoos", "resume", "-d", test_dir]
+    new_product_size_dict = run_and_kill(cmd)
 
     for product, old_file_size in old_product_size_dict.items():
         new_file_size = new_product_size_dict[product]

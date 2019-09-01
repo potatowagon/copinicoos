@@ -1,5 +1,6 @@
 import json
 import os
+import time
 
 import pytest
 
@@ -14,15 +15,27 @@ from conftest import query_txt_path, secrets1_json_path, secrets2_json_path, tes
         ("@" + query_txt_path, secrets2_json_path),
     ]
 )
-def test_cmd_input(query, login):
+def test_cmd_input_fresh(query, login):
     im = InputManager()
-    im.cmd_input(test_args=[query, login])
+    im.cmd_input(test_args=['fresh', query, login])
     args = im.return_args()
     assert type(args).__name__ == "Args"
 
-def test_new_cmd_input():
+
+def test_cmd_input_resume(worker_manager):
+    worker_manager.setup_workdir()
     im = InputManager()
-    im.cmd_input(test_args=['fresh','-h'])
+    im.cmd_input(test_args=['resume', '-d', test_dir])
+    args = im.return_args()
+    assert type(args).__name__ == "Args"
+
+def test_cmd_input_options(worker_manager):
+    worker_manager.setup_workdir()
+    im = InputManager()
+    with pytest.raises(SystemExit):
+        im.cmd_input(test_args=['resume', '-d', test_dir, '-r', '20.7', '-p', '40.8'])
+    args = im.return_args()
+    assert type(args).__name__ != "Args"
 
 def test_get_total_results_from_query_success(query, input_manager_with_2_workers):
     im = input_manager_with_2_workers

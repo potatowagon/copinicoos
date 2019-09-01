@@ -130,10 +130,7 @@ class InputManager():
         else:
             args = parser.parse_args(test_args)
         if args != None:
-            json_creds = self.get_json_creds(args.credentials)
-            self.account_manager.add_workers_from_json_creds(json_creds)
-            self.get_total_results_from_query(args.query)
-            self.args.query = query_formatter.req_search_res_json(args.query)
+            
             self._set_download_location(args.download_location)
             self.args.offline_retries = args.offline_retries
             self.args.polling_interval = args.polling_interval
@@ -142,23 +139,37 @@ class InputManager():
     def cmd_input(self, test_args=None):
         # create global options parser
         parser_global_options = argparse.ArgumentParser(add_help=False)
-        parser_global_options.add_argument('-d', '--download-location', help="Path to download folder", default=self.args.download_location)
-        parser_global_options.add_argument('-r', '--offline-retries', help="Number of get retries for offline product", default=self.args.offline_retries)
-        parser_global_options.add_argument('-p', '--polling-interval', help="Duration between each offline retry, in seconds", default=self.args.polling_interval)
+        parser_global_options.add_argument('-d', '--download-location', type=str, help="Path to download folder", default=self.args.download_location)
+        parser_global_options.add_argument('-r', '--offline-retries', type=int, help="Number of get retries for offline product", default=self.args.offline_retries)
+        parser_global_options.add_argument('-p', '--polling-interval', type=int, help="Duration between each offline retry, in seconds", default=self.args.polling_interval)
 
         # create the top-level parser
-        parser = argparse.ArgumentParser(prog='copinicoos', parents=[parser_global_options])
-        subparsers = parser.add_subparsers(help='sub-command help')
+        parser = argparse.ArgumentParser(prog='copinicoos')
+        subparsers = parser.add_subparsers(help='sub-command help', dest='subcmd')
         
         # create the parser for the "resume" command
         parser_resume = subparsers.add_parser('resume', help='Resume downloading from last savepoint', parents=[parser_global_options])
-        
+
         # create the parser for the "fresh" command
         parser_fresh = subparsers.add_parser('fresh', fromfile_prefix_chars='@', help='Start a fresh download', parents=[parser_global_options])
         parser_fresh.add_argument('query', type=str, help="The query in OpenSearch API format. Input path to @query.txt or input query as string directly. To generate a query, in Copenicus Open Hub apply search filters and search. The query will appear below the search bae as Request Done: (...)")
         parser_fresh.add_argument('credentials', type=str, help="Input path to @example.json file with credentials, or input credentials in json format.\nThe username is abbr. with uN, password with pN, where N is the account number, starting from one. for eg.\n{'u1':'username1','p1':'password1','u2':'username2','p2':'password2'}\nAttempts a login with 2 accounts")  
         
-        args = parser.parse_args(test_args)
+        if test_args == None:
+            args = parser.parse_args()
+        else:
+            args = parser.parse_args(test_args)
+
+        self._set_download_location(args.download_location)
+        self.args.offline_retries = args.offline_retries
+        self.args.polling_interval = args.polling_interval
+        if args.subcmd == 'resume':
+            self._load_from_config()
+        elif args.subcmd == 'fresh':
+            json_creds = self.get_json_creds(args.credentials)
+            self.account_manager.add_workers_from_json_creds(json_creds)
+            self.get_total_results_from_query(args.query)
+            self.args.query = query_formatter.req_search_res_json(args.query)
         
     def get_json_creds(self, arg):
         if arg.endswith(".json"):
