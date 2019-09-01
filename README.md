@@ -10,6 +10,9 @@
     - [Interactive Mode](#interactive-mode)
       - [Resume download](#resume-download)
     - [Argparse Mode](#argparse-mode)
+      - [resume](#resume)
+      - [fresh](#fresh)
+      - [For more details:](#for-more-details)
   - [Logs](#logs)
   - [Development](#development)
     - [Architecture](#architecture)
@@ -64,19 +67,34 @@ And then follow on-screen prompt:
 
 ### Argparse Mode
 
-```
-py -m copinicoos fresh <query> <credentials>
-```
+This mode is so that copinicoos can be called from a script.
 
 All options:
 ```
-py -m copinicoos <query> <credentials> -d <download-location> -r <offline-retries> -p <polling-interval>
+py -m copinicoos <subcommand> -d <download-location> -r <offline-retries> -p <polling-interval>
 ```
+Subcommand:
+- resume 
 
-For more details:
+- fresh
+
+#### resume
+
 ```
-py -m copinicoos --help
+py -m copinicoos resume
 ```
+Resume download from savepoint in current working directory
+
+```
+py -m copinicoos resume -d <download directory>
+```
+Resume download from savepoint in `<download directory>`
+
+#### fresh
+```
+py -m copinicoos fresh <query> <credentials>
+```
+Start a fresh download. 
 
 Input can be read from a text file by affixing `@` to file name eg.
 
@@ -101,8 +119,13 @@ eg. Inside `secrets.json`
 
 Note: `"` has to be escaped, ie `\"`, if parsing directly to the cmd.
 
+#### For more details:
+```
+py -m copinicoos --help
+```
+
 ## Logs
-Logs can be found in a folder named `copinicoos_logs` in the same directory where products are downloaded to.
+Logs can be found in a folder named `copinicoos_logs` in the same directory where products are downloaded to. Manually deleting `copinicoos_logs` will restart the download.
 
 ## Development
 
