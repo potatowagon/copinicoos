@@ -12,7 +12,7 @@ setup(
     author_email="e0007652@u.nus.com",
     url="https://github.com/potatowagon/copinicoos",
     keywords=["copinicoos", "copernicus", "downloader", "radar", "ESA", "EU", "satellite"],
-    install_requires=["colorama>=0.3.4"],
+    install_requires=["colorama>=0.3.4", "cryptography"],
     extras_require={
         "dev": [
             "codecov>=2.0.15",

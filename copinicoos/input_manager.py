@@ -10,6 +10,7 @@ from colorama import Fore
 from .worker import Worker
 from . import query_formatter
 from .account_manager import AccountManager
+from . import secure
 
 class InputManager():
     '''This class is repsonsible for collecting input from user and parsing it as auguments for WorkerManager to consume'''
@@ -193,7 +194,7 @@ class InputManager():
                     name = key
                     creds = config_dict[name]
                     username = creds["username"]
-                    password = creds["password"]
+                    password = secure.decrypt(creds["username"], creds["password"])
                     self.account_manager.add_worker(name, username, password)
             query = config_dict["query"]
             self.get_total_results_from_query(query)

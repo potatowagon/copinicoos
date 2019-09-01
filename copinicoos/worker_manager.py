@@ -9,6 +9,7 @@ from colorama import Fore
 from .resumable import Resumable
 from .loggable import Loggable
 from . import query_formatter
+from . import secure
 
 class WorkerManager(Resumable, Loggable):
     '''
@@ -117,7 +118,7 @@ class WorkerManager(Resumable, Loggable):
         for worker in self.worker_list:
             creds = {}
             creds["username"] = worker.username
-            creds["password"] = worker.password
+            creds["password"] = secure.encrypt(worker.username, worker.password)
             config_dict[worker.name] = creds
             with open(os.path.join(self.workdir, 'config.json'), 'w') as config_json:
                 json.dump(config_dict, config_json)
