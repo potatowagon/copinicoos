@@ -8,7 +8,11 @@
   - [Install](#install)
   - [Usage](#usage)
     - [Interactive Mode](#interactive-mode)
+      - [Resume download](#resume-download)
     - [Argparse Mode](#argparse-mode)
+      - [resume](#resume)
+      - [fresh](#fresh)
+      - [For more details:](#for-more-details)
   - [Logs](#logs)
   - [Development](#development)
     - [Architecture](#architecture)
@@ -32,33 +36,65 @@ py -m copinicoos
 ```
 And then follow on-screen prompt:
 
-1. Enter number of workers
+1. Enter Download Directory. Where products will be downloaded to. Entering nothing will default to current directory.
    
-2. Activate workers by entering copernicus hub account credentials. The account is used by worker to download products.
+2. Enter number of Corpernicus accounts. Each account will initialise 2 parallel download processes.
    
-3. Enter query. This can be obtained from Copernicus Open Hub `Request Done: ( ... )`. Just copy that whole string.
+3. Authenticate accounts by entering login credentials.
    
-4. Enter Download Directory. Where products will be downloaded to. Entering nothing will default to current directory.
+4. Enter query. This can be obtained from Copernicus Open Hub `Request Done: ( ... )`. Just copy that whole string.
 
 5. Enter Polling Interval. Entering nothing will use default.
 
 6. Enter offline product download retries. Entering nothing will use default.
 
+#### Resume download
+![](img/i_mode_resume.gif)
+
+Again, launch 
+```
+py -m copinicoos
+```
+And then follow on-screen prompt:
+
+1. Enter download directory containing `copinicoos_logs`. Or, if current working directory has `copinicoos_logs`, entering nothing will resume download from current working directory's savepoint. Savepoints are stored inside `copinicoos_logs`.
+
+2. Agree to resume download 
+
+3. Enter Polling Interval. Entering nothing will use default.
+
+4. Enter offline product download retries. Entering nothing will use default.
+
 ### Argparse Mode
 
-```
-py -m copinicoos <query> <credentials>
-```
+This mode is so that copinicoos can be called from a script.
 
 All options:
 ```
-py -m copinicoos <query> <credentials> -d <download-location> -r <offline-retries> -p <polling-interval>
+py -m copinicoos <subcommand> -d <download-location> -r <offline-retries> -p <polling-interval>
 ```
+Subcommand:
+- resume 
 
-For more details:
+- fresh
+
+#### resume
+
 ```
-py -m copinicoos --help
+py -m copinicoos resume
 ```
+Resume download from savepoint in current working directory
+
+```
+py -m copinicoos resume -d <download directory>
+```
+Resume download from savepoint in `<download directory>`
+
+#### fresh
+```
+py -m copinicoos fresh <query> <credentials>
+```
+Start a fresh download. 
 
 Input can be read from a text file by affixing `@` to file name eg.
 
@@ -83,8 +119,13 @@ eg. Inside `secrets.json`
 
 Note: `"` has to be escaped, ie `\"`, if parsing directly to the cmd.
 
+#### For more details:
+```
+py -m copinicoos --help
+```
+
 ## Logs
-Logs can be found in a folder named `copinicoos_logs` in the same directory where products are downloaded to.
+Logs can be found in a folder named `copinicoos_logs` in the same directory where products are downloaded to. Manually deleting `copinicoos_logs` will restart the download.
 
 ## Development
 
