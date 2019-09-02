@@ -16,6 +16,7 @@
   - [Logs](#logs)
   - [Development](#development)
     - [Architecture](#architecture)
+      - [Initialise and Setup](#initialise-and-setup)
     - [Testing](#testing)
 
 ## Install
@@ -83,12 +84,12 @@ Subcommand:
 ```
 py -m copinicoos resume
 ```
-Resume download from savepoint in current working directory
+Resume download from savepoint in current working directory.
 
 ```
 py -m copinicoos resume -d <download directory>
 ```
-Resume download from savepoint in `<download directory>`
+Resume download from savepoint in `<download directory>`.
 
 #### fresh
 ```
@@ -99,7 +100,7 @@ Start a fresh download.
 Input can be read from a text file by affixing `@` to file name eg.
 
 ```
-py -m copinicoos @query.txt @secrets.json
+py -m copinicoos fresh @query.txt @secrets.json
 ```
 
 eg. Inside `query.txt`
@@ -138,6 +139,9 @@ pip install -e .[dev]
 This installs the dependencies needed for the development environment found under setup.py extras, and runs copinicoos from the dev enviroment, which is to run the code in this repo. All changes are automatically reflected in the dev enviroment. 
 
 ### Architecture
+
+#### Initialise and Setup
+![](img/init.png)
 
 ### Testing
 
