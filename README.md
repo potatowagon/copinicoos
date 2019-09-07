@@ -1,8 +1,17 @@
 [![Build Status](https://travis-ci.org/potatowagon/copinicoos.svg?branch=master)](https://travis-ci.org/potatowagon/copinicoos)
 [![codecov](https://codecov.io/gh/potatowagon/copinicoos/branch/master/graph/badge.svg)](https://codecov.io/gh/potatowagon/copinicoos)
+![python version](https://img.shields.io/badge/python-3.6%20%7C%203.7-blue.svg)
+[![Platform support](https://img.shields.io/badge/platform-windows%20%7C%20macos%20%7C%20linux-lightgrey.svg)](https://travis-ci.org/potatowagon/copinicoos)
+[![GitHub license](https://img.shields.io/github/license/potatowagon/copinicoos)](https://github.com/potatowagon/copinicoos/blob/master/LICENSE)
 
 # Copinicoos
-<a href="https://scihub.copernicus.eu/dhus/#/home">Copernicus</a>-download manager. Downloads the results in a search query in parallel processes, for faster downloads. Manages polling for offline products.
+Copinicoos is a <a href="https://scihub.copernicus.eu/dhus/#/home">Copernicus</a> download manager. 
+
+Copinicoos can ...
+1) Automate the download of all results in a search query. 
+2) Download in parallel processes, for faster downloads. 
+3) Manage polling for offline products. 
+4) Stop and resume downloads, anytime!
 
 - [Copinicoos](#copinicoos)
   - [Install](#install)
@@ -21,14 +30,13 @@
 
 ## Install
 
-After cloning this repo, cd to root of this repo (where setup.py is) and 
 ```
-pip install .
+pip install copinicoos
 ```
-This installs copinicoos into python's site-packages.
 
 ## Usage
 ### Interactive Mode
+
 ![](img/i_mode.gif)
 
 To launch,
