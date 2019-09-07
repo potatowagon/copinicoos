@@ -2,6 +2,10 @@ import sys
 
 from .input_manager import InputManager
 from .worker_manager import WorkerManager
+from . import wget_check
+
+if not wget_check.is_wget_installed:
+    wget_check.install_wget()
 
 input_manager = InputManager()
 if len(sys.argv) == 1:
