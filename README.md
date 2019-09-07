@@ -140,14 +140,18 @@ Logs can be found in a folder named `copinicoos_logs` in the same directory wher
 A summary of finished downloads can be found in `copinicoos_logs\WorkerManager.log`. Resume points are saved in `<InstanceName>_progress.txt`
 
 ## Development
-
-Source code is in `copinicoos\copinicoos`
+Clone the repository.
+```
+git clone https://github.com/potatowagon/copinicoos.git
+```
 
 cd to where setup.py is and
 ```
 pip install -e .[dev]
 ```
 This installs the dependencies needed for the development environment found under setup.py extras, and runs copinicoos from the dev enviroment, which is to run the code in this repo. All changes are automatically reflected in the dev enviroment. 
+
+Source code is in `copinicoos\copinicoos`
 
 ### Architecture
 
