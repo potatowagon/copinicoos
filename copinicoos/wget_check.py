@@ -9,10 +9,13 @@ def is_wget_installed() -> bool:
     Returns:
         is_installed (bool)
     '''
-    cmd = ["wget", "--version"]
-    out = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
-    is_installed = 'Hrvoje Niksic' in str(out)
-    return is_installed
+    try:
+        cmd = ["wget", "--version"]
+        out = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+        is_installed = 'Hrvoje Niksic' in str(out)
+        return is_installed
+    except FileNotFoundError as e:
+        return False
 
 def is_macos() -> bool:
     system = platform.system()
@@ -27,9 +30,12 @@ def is_linux() -> bool:
     return 'Linux' in system
 
 def is_choco_installed() -> bool:
-    cmd = ["choco", "-?"]
-    out = str(subprocess.check_output(cmd, stderr=subprocess.STDOUT))
-    return 'Chocolatey' in out
+    try:
+        cmd = ["choco", "-?"]
+        out = str(subprocess.check_output(cmd, stderr=subprocess.STDOUT))
+        return 'Chocolatey' in out
+    except FileNotFoundError as e:
+        return False
 
 def install_choco() -> bool:
     print(Fore.YELLOW + "Attempting to install chocolatey. This step requires admin rights. If this fails, try running copinicoos from an Administrative shell, or install chocolatey yourself.")
