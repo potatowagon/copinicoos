@@ -37,7 +37,7 @@ def is_choco_installed() -> bool:
     except FileNotFoundError as e:
         return False
 
-def install_choco() -> bool:
+def install_choco():
     print(Fore.YELLOW + "Attempting to install chocolatey. This step requires admin rights. If this fails, try running copinicoos from an Administrative shell, or install chocolatey yourself.")
     cmd = '@\"%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command \"iex ((New-Object System.Net.WebClient).DownloadString(\'https://chocolatey.org/install.ps1\'))\" && SET \"PATH=%PATH%;%ALLUSERSPROFILE%\\chocolatey\\bin'
     subprocess.call(cmd, shell=True)
