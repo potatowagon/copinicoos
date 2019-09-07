@@ -258,7 +258,7 @@ class Worker(Resumable, Loggable):
                     self.logger.info(Fore.GREEN + "Downloaded product " + title)
                     status = "SUCCESS"
                 break
-        outcome = self.name + " " + title + " " + status
+        outcome = "ResultNum=" + str(result_num) + " " + self.name + " " + title + " " + status
         self.logger.info(outcome)
         return outcome
 
