@@ -9,10 +9,10 @@
 Copinicoos is a <a href="https://scihub.copernicus.eu/dhus/#/home">Copernicus</a> download manager. 
 
 Copinicoos can ...
-1) Automate the download of all results in a search query. 
-2) Download in parallel processes, for faster downloads. 
-3) Manage polling for offline products. 
-4) Stop and resume downloads, anytime!
+1. Automate the download of all results in a search query. 
+2. Download in parallel processes, for faster downloads. 
+3. Manage polling for offline products. 
+4. Stop and resume downloads, anytime!
 
 - [Copinicoos](#copinicoos)
   - [Install](#install)
