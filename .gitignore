@@ -33,5 +33,10 @@ wheels/
 # tox
 .tox/
 
-#codecov
-.coverage
+# codecov
+.coverage*
+
+# test output
+*copinicoos*_logs*
+*copinicoos*.json
+tests/S*.zip
