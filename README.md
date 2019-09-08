@@ -28,6 +28,7 @@ Copinicoos can ...
   - [Development](#development)
     - [Architecture](#architecture)
       - [Initialise and Setup](#initialise-and-setup)
+      - [Running workers](#running-workers)
     - [Testing](#testing)
 
 ## Install
@@ -158,6 +159,11 @@ Source code is in `copinicoos\copinicoos`
 
 #### Initialise and Setup
 ![](img/init.png)
+
+Note: Step 2. only happens in resume mode.
+
+#### Running workers
+![](img/run_worker.png)
 
 ### Testing
 
