@@ -18,8 +18,8 @@ class InputManager():
         self.args = Args()
         self.account_manager = AccountManager()
         self.args.download_location = os.getcwd()
-        self.args.polling_interval = 6
-        self.args.offline_retries = 2
+        self.args.polling_interval = 1800 # every 30 mins
+        self.args.offline_retries = 24 # give half day's grace for product to be online
         self.config_path = None
         self.copinicoos_logs_path = None
 
