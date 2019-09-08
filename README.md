@@ -165,6 +165,8 @@ Note: Step 2. only happens in resume mode.
 #### Running workers
 ![](img/run_worker.png)
 
+Steps 2. to 9. repeat until all result numbers in the search query have been assigned to a worker.
+
 ### Testing
 
 Tests reside in the tests/ folder. Uses pytest framework.
