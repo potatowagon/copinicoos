@@ -125,8 +125,11 @@ class InputManager():
         parser_global_options.add_argument('-r', '--offline-retries', type=int, help="Number of get retries for offline product", default=self.args.offline_retries)
         parser_global_options.add_argument('-p', '--polling-interval', type=int, help="Duration between each offline retry, in seconds", default=self.args.polling_interval)
 
+        description = Fore.GREEN + 'Coopinicoos is a Copernicus Download Manager.\n\n' + Fore.YELLOW + 'Run without aruguments to launch interactive mode.'
+        epilog = Fore.GREEN + 'Originally written by Wong Wen Qi Sherry <e0007652@u.nus.edu>.\nPlease send bug reports to <https://github.com/potatowagon/copinicoos/issues>.\n\nSource code and docs in <https://github.com/potatowagon/copinicoos>.\nHomepage: <https://potatowagon.github.io/copinicoos/>.\n\nLicensed under the terms of the MIT license. Please see <https://github.com/potatowagon/copinicoos/blob/master/LICENSE>.'
+
         # create the top-level parser
-        parser = argparse.ArgumentParser(prog='copinicoos')
+        parser = argparse.ArgumentParser(prog='copinicoos', description=description, epilog=epilog, formatter_class=argparse.RawTextHelpFormatter)
         subparsers = parser.add_subparsers(help='sub-command help', dest='subcmd')
         
         # create the parser for the "resume" command
