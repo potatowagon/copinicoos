@@ -16,6 +16,7 @@ def test_windows_admin_install_wget():
 
 def test_install_wget():
     wget_check.install_wget()
+    assert wget_check.is_wget_installed()
 
 def test_windows_non_admin_install_wget():
     if wget_check.is_windows():
