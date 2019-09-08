@@ -42,7 +42,12 @@ class InputManager():
     
     def _get_account_input_i(self):
         print(Fore.YELLOW + "Enter number of accounts: ")
-        total_accounts = int(input())
+        total_accounts = None
+        while total_accounts == None:
+            try:
+                total_accounts = int(input())
+            except ValueError as e:
+                print(Fore.RED + "Invalid input. Please enter an integer.")
         i = 1
         while i <= total_accounts:
             print(Fore.YELLOW + "Enter username of account " + str(i))
