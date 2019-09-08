@@ -7,7 +7,7 @@
 [![Join the chat at https://gitter.im/copinicoos/community](https://badges.gitter.im/copinicoos/community.svg)](https://gitter.im/copinicoos/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 # Copinicoos
-Copinicoos is a <a href="https://scihub.copernicus.eu/dhus/#/home">Copernicus</a> download manager. 
+Copinicoos is a <a href="https://scihub.copernicus.eu/dhus/#/home">Copernicus</a> satellite image download manager. 
 
 Copinicoos can ...
 1. Automate the download of all results in a search query. 
