@@ -13,7 +13,7 @@ def get_long_description():
 
 setup(
     name="copinicoos",
-    version="0.0.1.3",
+    version="0.0.1",
     packages=["copinicoos"],
     description="Copernicus Download Manager",
     long_description=get_long_description(),
@@ -21,7 +21,7 @@ setup(
     author="Sherry aka potatowagon",
     author_email="e0007652@u.nus.edu",
     url="https://github.com/potatowagon/copinicoos",
-    keywords=["copinicoos", "copernicus", "downloader", "radar", "ESA", "EU", "satellite", "sentinel", "sar", "download", "manager"],
+    keywords=["copinicoos", "copernicus", "downloader", "radar", "ESA", "EU", "satellite", "sentinel", "sar", "download", "manager", "image", "data"],
     install_requires=["colorama>=0.3.4", "cryptography"],
     extras_require={
         "dev": [
