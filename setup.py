@@ -13,7 +13,7 @@ def get_long_description():
 
 setup(
     name="copinicoos",
-    version="0.0.1",
+    version="0.0.2",
     packages=["copinicoos"],
     description="Copernicus Download Manager",
     long_description=get_long_description(),
