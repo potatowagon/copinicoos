@@ -1,6 +1,7 @@
 [![Build Status](https://travis-ci.org/potatowagon/copinicoos.svg?branch=master)](https://travis-ci.org/potatowagon/copinicoos)
 [![codecov](https://codecov.io/gh/potatowagon/copinicoos/branch/master/graph/badge.svg)](https://codecov.io/gh/potatowagon/copinicoos)
-![python version](https://img.shields.io/badge/python-3.6%20%7C%203.7-blue.svg)
+[![PyPI](https://img.shields.io/pypi/v/copinicoos)](https://pypi.org/project/copinicoos/)
+[![python version](https://img.shields.io/badge/python-3.6%20%7C%203.7-blue.svg)](https://pypi.org/project/copinicoos/)
 [![Platform support](https://img.shields.io/badge/platform-windows%20%7C%20macos%20%7C%20linux-lightgrey.svg)](https://travis-ci.org/potatowagon/copinicoos)
 [![GitHub license](https://img.shields.io/github/license/potatowagon/copinicoos)](https://github.com/potatowagon/copinicoos/blob/master/LICENSE) 
 [![Join the chat at https://gitter.im/copinicoos/community](https://badges.gitter.im/copinicoos/community.svg)](https://gitter.im/copinicoos/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
