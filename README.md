@@ -56,9 +56,9 @@ And then follow on-screen prompt:
    
 4. Enter query. This can be obtained from Copernicus Open Hub `Request Done: ( ... )`. Just copy that whole string.
 
-5. Enter Polling Interval. Entering nothing will use default.
+5. Enter Polling Interval. Entering nothing will use default of one poll every 30 mins.
 
-6. Enter offline product download retries. Entering nothing will use default.
+6. Enter offline product download retries. Entering nothing will use default of 24 retries. That is half a day's grace for the product to be online before moving on to the next product. 
 
 #### Resume download
 ![](img/i_mode_resume.gif)
@@ -89,6 +89,15 @@ Subcommand:
 - resume 
 
 - fresh
+
+When any of the optional options: `-d`, `-r`, `-p` are omitted copinicoos will fall back to using default values.
+
+Default values are
+```
+-d, --download-location : the current working directory
+-r, --offline-retries : 24 retries
+-p, --polling-interval : 1800 seconds, or 30 mins
+```
 
 #### resume
 
