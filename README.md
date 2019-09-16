@@ -58,7 +58,7 @@ And then follow on-screen prompt:
 
 5. Enter Polling Interval. Entering nothing will use default of one poll every 30 mins.
 
-6. Enter offline product download retries. Entering nothing will use default of 24 retries. That is half a day's grace for the product to be online before moving on to the next product. 
+6. Enter offline product download retries. Entering nothing will use default of 24 retries. That is half a day's grace (for default polling interval of 30 mins) for the product to be online before moving on to the next product. 
 
 #### Resume download
 ![](img/i_mode_resume.gif)
