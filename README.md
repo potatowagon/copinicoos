@@ -148,7 +148,10 @@ py -m copinicoos --help
 ## Logs
 Logs can be found in a folder named `copinicoos_logs` in the same directory where products are downloaded to. Manually deleting `copinicoos_logs` will restart the download.
 
-A summary of finished downloads can be found in `copinicoos_logs\WorkerManager.log`. Resume points are saved in `<InstanceName>_progress.txt`
+A summary of finished downloads can be found in `copinicoos_logs\WorkerManager.log`. You can check the download status (`SUCCESS`, `FAILED` or `OFFLINE`) of each product in this log file.
+
+Resume points are saved in `<InstanceName>_progress.txt`
+
 
 ## Development
 Clone the repository.
